@@ -3,7 +3,7 @@ from dataclasses import dataclass
 
 
 @dataclass
-class AdressModel(db.Model):
+class AddressModel(db.Model):
     id: int
     street: str
     number: int
@@ -13,7 +13,7 @@ class AdressModel(db.Model):
     postal_code: str
     coordenadas: str
 
-    __tablename__ = 'adresses'
+    __tablename__ = 'addresses'
 
     id = db.Column(db.Integer, primary_key=True)
     street = db.Column(db.String(255))
