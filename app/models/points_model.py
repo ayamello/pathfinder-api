@@ -16,7 +16,7 @@ class PointModel(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
-    description = db.Column(db.String(255), nullable=False, unique=True)
+    description = db.Column(db.String(255), nullable=False)
     initial_date = db.Column(db.DateTime)
     end_date = db.Column(db.DateTime)
     duration = db.Column(db.Integer)
