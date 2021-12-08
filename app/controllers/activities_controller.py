@@ -1,9 +1,8 @@
 from flask import json, request, current_app, jsonify
 from app.models.activities_model import ActivityModel
 from app.exceptions.activities_exception import WrongKeysError, NotFoundDataError
-from psycopg2.errors import NotNullViolation, ForeignKeyViolation
+from psycopg2.errors import NotNullViolation
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.sql.functions import func
 
 def create():
     try:
