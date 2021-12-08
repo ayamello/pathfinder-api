@@ -22,7 +22,7 @@ class PointModel(db.Model):
     duration = db.Column(db.Integer)
     address_id = db.Column(
       db.Integer,
-      db.ForeignKey('adresses.id'),
+      db.ForeignKey('addresses.id'),
       nullable=False,
     )
 

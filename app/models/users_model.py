@@ -1,6 +1,6 @@
+from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
-from app.models.users_paths_table import users_paths
 
 
 @dataclass
@@ -19,5 +19,5 @@ class UserModel(db.Model):
     birthdate = db.Column(db.DateTime, nullable=False)
     password_hash = db.Column(db.String)
 
-    paths_list = db.relationship('PathModel', secondary=users_paths, backref='users_list')
+    paths_list = db.relationship('PathModel', backref=backref('user', uselist=False))
 
