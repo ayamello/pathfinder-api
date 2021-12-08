@@ -8,21 +8,13 @@ from sqlalchemy.sql.functions import func
 def create():
     try:
         data = request.get_json()
-        # validated_data = ActivityModel.validate(**data)
         new_data = ActivityModel(**data)
-        print(new_data)
         current_app.db.session.add(new_data)
         current_app.db.session.commit()
 
         return jsonify(new_data), 201
-    except IntegrityError as err:
-        if type(err.orig) == NotNullViolation:
-            return {'Error': 'Request must contain, name, description and point_id'}, 422
-    # except WrongKeysError as err:
-    #     return jsonify({"error": err.message}), 404
-
-    # if type(err.orig) == ForeignKeyViolation:
-    #     return {'msg': str(e.orig).split('\n')[1]}, 422
+    except IntegrityError:
+        return {'Error': 'Request must contain only, name, description and point_idcl'}, 400
 
 def update(id: int):
     try:
@@ -30,7 +22,6 @@ def update(id: int):
         activity = ActivityModel.query.get(id)
         if not activity:
             raise NotFoundDataError('Activity not found!')
-        # validated_data = ActivityModel.validate(**data)
         activity = ActivityModel.query.filter(ActivityModel.id == id).update(data)
         
         current_app.db.session.commit()
