@@ -13,7 +13,15 @@ class ActivityModel(db.Model):
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False, unique=True)
     point_id = db.Column(
-      db.Integer,
-      db.ForeignKey('points.id'),
-      nullable=False,
+        db.Integer,
+        db.ForeignKey('points.id'),
+        nullable=False,
     )
+
+    @staticmethod
+    def validate(**kwargs):
+        name = kwargs['name']
+
+        
+
+        return None
