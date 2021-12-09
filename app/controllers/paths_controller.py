@@ -39,3 +39,8 @@ def delete_path(id):
     except UnmappedInstanceError:
         return {'msg': 'ID Not Found'}, 404
 
+#Rota apenas para testes de subscriptions
+def read_all():
+    list = PathModel.query.all()
+    print(list)
+    return jsonify(list), 200

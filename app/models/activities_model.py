@@ -18,10 +18,3 @@ class ActivityModel(db.Model):
         nullable=False,
     )
 
-    @staticmethod
-    def validate(**kwargs):
-        name = kwargs['name']
-
-        
-
-        return None
