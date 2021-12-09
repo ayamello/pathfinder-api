@@ -39,8 +39,43 @@ def delete_path(id):
     except UnmappedInstanceError:
         return {'msg': 'ID Not Found'}, 404
 
-#Rota apenas para testes de subscriptions
-def read_all():
-    list = PathModel.query.all()
-    print(list)
-    return jsonify(list), 200
+def update_path(id):
+    data = request.get_json()
+    path = PathModel.query.get(id)
+
+    # Key not found
+    # Se não for string 
+    # se a string estiver vazia
+    # keys incorretas
+    # não poderia trocar o user_id
+    # end date não pode ser uma data antes, só depois
+
+    if not path:
+        return {'msg': "Not found"}, 404
+    
+    for key, value in data.items():
+        setattr(path, key, value)
+    
+    current_app.db.session.add(path)
+    current_app.db.session.commit()
+
+    return jsonify(path), 200
+
+def get_all_paths():
+    #  tratar lista vazia
+    # paginação da rota
+    paths = PathModel.query.all()
+    #set_trace()
+    
+    return jsonify(paths), 200
+
+def get_paths_by_user_id(id):
+    # tratar lista vazia
+    # paginação da rota
+    paths_by_user = PathModel.query.filter_by(user_id=id).all()
+
+    return jsonify(paths_by_user), 200
+
+# update
+# get by id do usuario
+# get geralzao

@@ -10,7 +10,7 @@ class PathModel(db.Model):
     initial_date: str
     end_date: str
     duration: str
-    subscribers: list
+    # subscribers: list
     points: list
 
     __tablename__ = 'paths'
