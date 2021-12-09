@@ -1,9 +1,11 @@
 from flask import request, current_app, jsonify
+from flask_jwt_extended import jwt_required
 from app.models.activities_model import ActivityModel
 from app.exceptions.activities_exception import WrongKeysError, NotFoundDataError
 from psycopg2.errors import NotNullViolation
 from sqlalchemy.exc import IntegrityError
 
+@jwt_required()
 def create_activity():
     try:
         data = request.get_json()
@@ -15,6 +17,7 @@ def create_activity():
     except IntegrityError:
         return {'Error': 'Request must contain only, name, description and point_idcl'}, 400
 
+@jwt_required()
 def update_activity(id: int):
     try:
         data = request.get_json()
@@ -34,6 +37,7 @@ def update_activity(id: int):
         return jsonify({'Message': err.message}), 404
 
 
+@jwt_required()
 def delete_activity(id: int):
     try:
         activity = ActivityModel.query.get(id)

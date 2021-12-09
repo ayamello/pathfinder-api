@@ -1,10 +1,11 @@
 from flask import request, current_app, jsonify
+from flask_jwt_extended import jwt_required
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError
 
-
+@jwt_required()
 def create_point():
     try:
         data = request.get_json()
@@ -35,7 +36,7 @@ def create_point():
     except KeyError as err:
         return {'error': {'Verify key':str(err)}}, 400
 
-
+@jwt_required()
 def activities_by_point(id: int):
     try:
         activities_by_point = PointModel.query.get(id)
@@ -43,7 +44,7 @@ def activities_by_point(id: int):
     except AttributeError:
         return {'error': 'Point ID Not Found'}, 404
 
-
+@jwt_required()
 def update_point(id: int):
     try:
         data = request.get_json()
@@ -55,7 +56,7 @@ def update_point(id: int):
     except InvalidRequestError as err:
         return jsonify({"error": str(err)}), 400
               
-
+@jwt_required()
 def delete_point(id: int):
     try:
         point = PointModel.query.filter_by(id=id).first()
