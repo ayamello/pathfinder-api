@@ -1,6 +1,6 @@
 from flask import request, current_app, jsonify
 from app.models.users_model import UserModel
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required
 import sqlalchemy
 import psycopg2
 
@@ -46,12 +46,14 @@ def login():
     else:
         return {'error': 'Unauthorized'}, 401
 
+@jwt_required()
 def get_all_users():
 
     users = UserModel.query.all()
 
     return jsonify(users), 200
 
+@jwt_required()
 def get_by_username(id):
 
     user = UserModel.query.get(id)
@@ -61,6 +63,7 @@ def get_by_username(id):
 
     return jsonify(user), 200
     
+@jwt_required()
 def update_user(id):
     
     data = request.get_json()
@@ -79,6 +82,7 @@ def update_user(id):
 
     return jsonify(user), 200
 
+@jwt_required()
 def delete_user(id):
 
     try:
