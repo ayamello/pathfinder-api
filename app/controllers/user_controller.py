@@ -60,9 +60,36 @@ def get_by_username(id):
         return {'error': 'User not found.'}, 404
 
     return jsonify(user), 200
-
-
     
+def update_user(id):
+    
+    data = request.get_json()
 
+    try:
+        user = UserModel.query.get(id)
+
+        for key, value in data.items():
+            setattr(user, key, value)
+
+        current_app.db.session.add(user)
+        current_app.db.session.commit()
+
+    except AttributeError as e:
+        return {'error': 'User not found.'}, 404
+
+    return jsonify(user), 200
+
+def delete_user(id):
+
+    try:
+        user = UserModel.query.get(id)
+
+        current_app.db.session.delete(user)
+        current_app.db.session.commit()
+    
+    except sqlalchemy.orm.exc.UnmappedInstanceError:
+        return {'error': 'User not found.'}, 404
+
+    return "", 204
 
 
