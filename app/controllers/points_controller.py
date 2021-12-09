@@ -6,6 +6,7 @@ from sqlalchemy.exc import InvalidRequestError
 # from ipdb import set_trace
 
 
+
 def create_point():
     try:
         data = request.get_json()
