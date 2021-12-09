@@ -3,6 +3,8 @@ from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError
+# from ipdb import set_trace
+
 
 
 def create_point():
