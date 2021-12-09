@@ -36,7 +36,7 @@ def create_point():
     except KeyError as err:
         return {'error': {'Verify key':str(err)}}, 400
 
-
+@jwt_required()
 def activities_by_point(id: int):
     try:
         activities_by_point = PointModel.query.get(id)
