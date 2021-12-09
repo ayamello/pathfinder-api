@@ -52,7 +52,7 @@ def get_all_paths():
     return jsonify(paths), 200
 
 def get_paths_by_user_id(id):
-    #  tratar lista vazia
+    # tratar lista vazia
     # paginação da rota
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
 
