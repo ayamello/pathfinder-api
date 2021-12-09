@@ -26,4 +26,4 @@ class PointModel(db.Model):
       nullable=False,
     )
 
-    activities = db.relationship('ActivityModel', backref='point')
+    activities = db.relationship('ActivityModel', backref='point', cascade='all, delete-orphan')

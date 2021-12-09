@@ -3,7 +3,6 @@ from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError
-# from ipdb import set_trace
 
 
 def create_point():
@@ -34,29 +33,25 @@ def create_point():
         current_app.db.session.commit()
         return jsonify(point), 201
     except KeyError as err:
-        return {'Verify key': str(err)}, 400
+        return {'error': {'Verify key':str(err)}}, 400
 
 
-def list_all_points():
-    points = PointModel.query.order_by(PointModel.id).all()
-    return jsonify(points), 200
-
-
-def all_point_activities(id: int):
+def activities_by_point(id: int):
     try:
         activities_by_point = PointModel.query.get(id)
         return {'activities': activities_by_point.activities}, 200
     except AttributeError:
-        return {'msg': 'ID Not Found'}, 404
+        return {'error': 'Point ID Not Found'}, 404
 
 
 def update_point(id: int):
     try:
         data = request.get_json()
         if PointModel.query.filter_by(id=id).update(data):
-            current_app.db.session.commit()   
-            return '', 204
-        return {'msg': 'ID Not Found'}, 404
+            current_app.db.session.commit()  
+            point = PointModel.query.get(id)
+            return jsonify(point), 200
+        return {'error': ' Point ID Not Found'}, 404
     except InvalidRequestError as err:
         return jsonify({"error": str(err)}), 400
               
@@ -68,4 +63,4 @@ def delete_point(id: int):
         current_app.db.session.commit()
         return '', 204
     except UnmappedInstanceError:
-        return {'msg': 'ID Not Found'}, 404
+        return {'error': 'Point ID Not Found'}, 404
