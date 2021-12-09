@@ -4,6 +4,7 @@ class WrongKeysError(Exception):
             "valid_options": keys,
             "received_options": wrong_keys
         }
+        
         super().__init__(self.message)
 
 
