@@ -28,7 +28,7 @@ class UserModel(db.Model):
 
     @property
     def password(self):
-        raise AttributeError("Wrong password.")
+        raise AttributeError('Wrong password.')
 
     @password.setter
     def password(self, password_to_hash):
