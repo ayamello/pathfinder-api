@@ -4,7 +4,7 @@ from app.exceptions.activities_exception import WrongKeysError, NotFoundDataErro
 from psycopg2.errors import NotNullViolation
 from sqlalchemy.exc import IntegrityError
 
-def create():
+def create_activity():
     try:
         data = request.get_json()
         new_data = ActivityModel(**data)
@@ -15,7 +15,7 @@ def create():
     except IntegrityError:
         return {'Error': 'Request must contain only, name, description and point_idcl'}, 400
 
-def update(id: int):
+def update_activity(id: int):
     try:
         data = request.get_json()
         activity = ActivityModel.query.get(id)
@@ -34,7 +34,7 @@ def update(id: int):
         return jsonify({'Message': err.message}), 404
 
 
-def delete(id: int):
+def delete_activity(id: int):
     try:
         activity = ActivityModel.query.get(id)
         if not activity:
