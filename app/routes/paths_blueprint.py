@@ -9,3 +9,4 @@ bp.delete('/<int:id>')(delete_path)
 bp.patch('/<int:id>')(update_path)
 bp.get('')(get_all_paths)
 bp.get('/<int:id>')(get_paths_by_user_id)
+
