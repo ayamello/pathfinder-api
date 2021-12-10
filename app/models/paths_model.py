@@ -10,7 +10,7 @@ class PathModel(db.Model):
     initial_date: str
     end_date: str
     duration: str
-    # subscribers: list
+    subscribers: list
     points: list
 
     __tablename__ = 'paths'
@@ -29,3 +29,4 @@ class PathModel(db.Model):
 
     subscribers = db.relationship('SubscriberModel', cascade='all, delete-orphan')
     points = db.relationship('PointModel', secondary=points_paths, backref='paths_list')
+

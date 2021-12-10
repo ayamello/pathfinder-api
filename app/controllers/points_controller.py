@@ -55,7 +55,7 @@ def update_point(id: int):
         return {'error': ' Point ID Not Found'}, 404
     except InvalidRequestError as err:
         return jsonify({"error": str(err)}), 400
-              
+
 @jwt_required()
 def delete_point(id: int):
     try:

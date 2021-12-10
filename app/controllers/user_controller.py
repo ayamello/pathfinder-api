@@ -7,7 +7,7 @@ import psycopg2
 def create_user():
     data = request.get_json()
 
-    password_to_hash = data.pop("password")
+    password_to_hash = data.pop('password')
 
     try:
         new_user = UserModel(**data)
@@ -40,7 +40,6 @@ def login():
     if found_user.verify_password(data['password']):
         access_token = create_access_token(identity=found_user)
         return {
-            'username': found_user.username,
             'token': access_token
             }, 200
     else:
@@ -94,6 +93,6 @@ def delete_user(id):
     except sqlalchemy.orm.exc.UnmappedInstanceError:
         return {'error': 'User not found.'}, 404
 
-    return "", 204
+    return '', 204
 
 
