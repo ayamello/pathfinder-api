@@ -8,7 +8,6 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 def create_path():
     try:
         data = request.get_json()
-        print(data)
         current_user = get_jwt_identity()
         data['user_id'] = current_user['id']
 
