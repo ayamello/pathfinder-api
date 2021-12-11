@@ -2,7 +2,8 @@ from flask import request, current_app, jsonify
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
+from datetime import datetime
+from ipdb import set_trace
 
 @jwt_required()
 def create_path():
@@ -20,15 +21,15 @@ def create_path():
             "id": path.id,
             "name": path.name,
             "description": path.description,
-            "initial_date": path.initial_date,
-            "end_date": path.end_date,
+            "initial_date": path.initial_date.strftime("%d/%m/%Y"),
+            "end_date": path.end_date.strftime("%d/%m/%Y"),
             "duration": path.duration,
             "user": {
                 "name": path.user.name,
                 "email": path.user.email
             }
         }
-
+        set_trace()
         return jsonify(result), 201
     except:
         return jsonify({'error': 'error'}), 400
