@@ -1,4 +1,6 @@
 from flask import request, current_app, jsonify
+from app.controllers.base_controller import create, get_all, update
+from app.exceptions.activities_exception import NotFoundDataError, WrongKeysError
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -11,10 +13,7 @@ def create_path():
         current_user = get_jwt_identity()
         data['user_id'] = current_user['id']
 
-        path = PathModel(**data)
-
-        current_app.db.session.add(path)
-        current_app.db.session.commit()
+        path = create(data, PathModel, "")
 
         result = {
             "id": path.id,
@@ -30,6 +29,7 @@ def create_path():
         }
 
         return jsonify(result), 201
+
     except:
         return jsonify({'error': 'error'}), 400
 
@@ -44,32 +44,28 @@ def delete_path(id):
         return {'msg': 'Path ID Not Found'}, 404
 
 def update_path(id):
-    data = request.get_json()
-    path = PathModel.query.get(id)
 
-    # Key not found
     # Se não for string 
     # se a string estiver vazia
     # keys incorretas
     # não poderia trocar o user_id
     # end date não pode ser uma data antes, só depois
+    try:
+        data = request.get_json()
 
-    if not path:
-        return {'msg': "Path ID Not found"}, 404
-    
-    for key, value in data.items():
-        setattr(path, key, value)
-    
-    current_app.db.session.add(path)
-    current_app.db.session.commit()
+        path = update(PathModel, data, id)
 
-    return jsonify(path), 200
+    except NotFoundDataError as e:
+        return jsonify({'error': str(e)}), 404
+
+    except WrongKeysError as e:
+        return jsonify({'error': e.message}), 400
+
+    return path
 
 def get_all_paths():
-    #  tratar lista vazia
-    # paginação da rota
-    paths = PathModel.query.all()
-    #set_trace()
+
+    paths = get_all(PathModel)
     
     return jsonify(paths), 200
 
