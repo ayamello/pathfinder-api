@@ -1,8 +1,8 @@
 from flask import request, current_app, jsonify
-from app.exceptions.activities_exception import NotFoundDataError, WrongKeysError
+from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
-from app.controllers.base_controller import create, get_all, update
+from app.controllers.base_controller import create, delete, get_all, update
 import sqlalchemy
 import psycopg2
 
@@ -51,7 +51,7 @@ def get_all_users():
     return jsonify(users), 200
 
 @jwt_required()
-def get_by_username(id):
+def get_by_id(id):
 
     user = UserModel.query.get(id)
 
@@ -80,14 +80,11 @@ def update_user(id):
 def delete_user(id):
 
     try:
-        user = UserModel.query.get(id)
-
-        current_app.db.session.delete(user)
-        current_app.db.session.commit()
+        user = delete(UserModel, id)
     
     except sqlalchemy.orm.exc.UnmappedInstanceError:
         return {'error': 'User not found.'}, 404
 
-    return '', 204
+    return user
 
 

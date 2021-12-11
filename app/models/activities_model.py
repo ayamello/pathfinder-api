@@ -1,13 +1,15 @@
 from app.configs.database import db
 from dataclasses import dataclass
+from app.exceptions.activities_subscribers_exception import NotStringError, WrongKeysError
 
 
 @dataclass
 class ActivityModel(db.Model):
-    name: str
+    name: str 
     description: str
 
     __tablename__ = 'activities'
+
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
@@ -18,3 +20,18 @@ class ActivityModel(db.Model):
         nullable=False,
     )
 
+
+    @staticmethod
+    def validate(**kwargs):
+        valid_keys = ['name', 'description', 'point_id']
+        received_keys = [key for key in kwargs.keys()]
+
+        if not valid_keys == received_keys:
+            raise WrongKeysError(valid_keys, received_keys)
+        
+        if not type(kwargs['name']) == str:
+            raise NotStringError('name must be string!')
+
+        kwargs['name']=kwargs['name'].title()
+
+        return kwargs

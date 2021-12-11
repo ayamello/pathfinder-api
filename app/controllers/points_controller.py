@@ -1,7 +1,8 @@
 from flask import request, current_app, jsonify
 from flask_jwt_extended import jwt_required
-from app.controllers.base_controller import create, update
-from app.exceptions.activities_exception import NotFoundDataError, WrongKeysError
+from app.controllers.base_controller import create, delete, update
+from app.exceptions.activities_subscribers_exception import NotFoundDataError
+from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
@@ -11,6 +12,9 @@ from sqlalchemy.exc import InvalidRequestError
 def create_point():
     try:
         data = request.get_json()
+
+        path_id = data.pop('path_id')
+
         data_address = {
             'street': data['street'],
             'number': data['number'],
@@ -21,7 +25,7 @@ def create_point():
             'coordenadas': data['coordenadas']
         }
 
-        address = create(data_address, AddressModel, "")
+        address = create(data_address, AddressModel, '')
 
         AddressModel.query.filter(AddressModel.street==address.street, AddressModel.number==address.number).first()
         
@@ -34,7 +38,12 @@ def create_point():
             'address_id': address.id
         }
 
-        point = create(data_point, PointModel, "")
+        point = create(data_point, PointModel, '')
+
+        path = PathModel.query.get(path_id)
+        path.points.append(point)
+        
+        current_app.db.session.commit()
 
         return jsonify(point), 201
 
@@ -52,25 +61,19 @@ def activities_by_point(id: int):
 @jwt_required()
 def update_point(id: int):
 
-    try:
-        data = request.get_json()
+    
+    data = request.get_json()
 
-        point = update(PointModel, data, id)
-
-    except NotFoundDataError as e:
-        return jsonify({'error': str(e)}), 404
-
-    except WrongKeysError as e:
-        return jsonify({'error': e.message}), 400
+    point = update(PointModel, data, id)
 
     return point
 
 @jwt_required()
 def delete_point(id: int):
     try:
-        point = PointModel.query.filter_by(id=id).first()
-        current_app.db.session.delete(point)
-        current_app.db.session.commit()
-        return '', 204
-    except UnmappedInstanceError:
+        point = delete(PointModel, id)
+
+    except NotFoundDataError:
         return {'error': 'Point ID Not Found'}, 404
+
+    return point

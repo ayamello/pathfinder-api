@@ -1,8 +1,7 @@
 from os import W_OK
 from flask import current_app, jsonify
-from app.exceptions.activities_exception import NotFoundDataError, WrongKeysError
+from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
-import sqlalchemy
 
 def create(data, model, password_hash):
     
@@ -40,3 +39,13 @@ def update(model, data, id):
 
     return jsonify(updated), 200
 
+def delete(model, id):
+    item = model.query.get(id)
+
+    if not item:
+        raise NotFoundDataError('Activity ID not found!')
+
+    current_app.db.session.delete(item)
+    current_app.db.session.commit()
+
+    return '', 204
