@@ -1,55 +1,56 @@
 from flask import request, current_app, jsonify
 from flask_jwt_extended import jwt_required
+from app.controllers.base_controller import create, delete, update
 from app.models.activities_model import ActivityModel
 from app.exceptions.activities_subscribers_exception import NotStringError, WrongKeysError, NotFoundDataError
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
 
 @jwt_required()
 def create_activity():
     try:
         data = request.get_json()
-        validated_data = ActivityModel.validate(**data)
-        activity = ActivityModel(**validated_data)
-        current_app.db.session.add(activity)
-        current_app.db.session.commit()
 
-        return jsonify(activity), 201
+        validated_data = ActivityModel.validate(**data)
+
+        new_activity = create(validated_data, ActivityModel, '')
+
+        return jsonify(new_activity), 201
+
+    except IntegrityError:
+        return {'error': 'Request must contain only, name, description and point_id'}, 400
+
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
+
     except NotStringError as err:
         return jsonify({'error': str(err)}), 400
 
 @jwt_required()
 def update_activity(id: int):
+
     try:
         data = request.get_json()
-        activity = ActivityModel.query.get(id)
-        if not activity:
-            raise NotFoundDataError('Activity ID not found!')
-        activity = ActivityModel.query.filter(ActivityModel.id == id).update(data)
+        activity = update(ActivityModel, data, id)
 
-        current_app.db.session.commit()
+    except NotFoundDataError as e:
+        return jsonify({'error': str(e)}), 404
 
-        updated_activity = ActivityModel.query.get(id)
+    except WrongKeysError as e:
+        return jsonify({'error': e.message}), 400
 
-        return jsonify(updated_activity), 200
-    except NotFoundDataError as err:
-        return jsonify({'error': str(err)}), 404
     except InvalidRequestError as err:
-        return jsonify({"error": str(err)}), 400
+        return jsonify({'error': str(err)}), 400
+
+    return activity
 
 
 @jwt_required()
 def delete_activity(id: int):
     try:
-        activity = ActivityModel.query.get(id)
-        if not activity:
-            raise NotFoundDataError('Activity ID not found!')
+        activity = delete(ActivityModel, id)
 
-        current_app.db.session.delete(activity)
-        current_app.db.session.commit()
-
-        return '', 204
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
+
+    return activity
 

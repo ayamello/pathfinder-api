@@ -1,21 +1,20 @@
 from flask import request, current_app, jsonify
+from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
+from app.controllers.base_controller import create, delete, get_all, update
 import sqlalchemy
 import psycopg2
 
 def create_user():
-    data = request.get_json()
 
-    password_to_hash = data.pop('password')
 
     try:
-        new_user = UserModel(**data)
-
-        new_user.password = password_to_hash
-
-        current_app.db.session.add(new_user)
-        current_app.db.session.commit()
+        data = request.get_json()
+        
+        password_to_hash = data.pop('password')
+        
+        new_user = create(data, UserModel, password_to_hash)
 
     except sqlalchemy.exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.NotNullViolation:
@@ -26,8 +25,7 @@ def create_user():
     except TypeError as e:
         return {'error': 'There are extra fields.'}, 400
 
-
-    return jsonify(new_user)
+    return jsonify(new_user), 201
 
 def login():
     data = request.get_json()
@@ -48,12 +46,12 @@ def login():
 @jwt_required()
 def get_all_users():
 
-    users = UserModel.query.all()
+    users = get_all(UserModel)
 
     return jsonify(users), 200
 
 @jwt_required()
-def get_by_username(id):
+def get_by_id(id):
 
     user = UserModel.query.get(id)
 
@@ -65,34 +63,28 @@ def get_by_username(id):
 @jwt_required()
 def update_user(id):
     
-    data = request.get_json()
-
     try:
-        user = UserModel.query.get(id)
+        data = request.get_json()
 
-        for key, value in data.items():
-            setattr(user, key, value)
+        user = update(UserModel, data, id)
 
-        current_app.db.session.add(user)
-        current_app.db.session.commit()
+    except NotFoundDataError as e:
+        return jsonify({'error': str(e)}), 404
 
-    except AttributeError as e:
-        return {'error': 'User not found.'}, 404
+    except WrongKeysError as e:
+        return jsonify({'error': e.message}), 400
 
-    return jsonify(user), 200
+    return user
 
 @jwt_required()
 def delete_user(id):
 
     try:
-        user = UserModel.query.get(id)
-
-        current_app.db.session.delete(user)
-        current_app.db.session.commit()
+        user = delete(UserModel, id)
     
     except sqlalchemy.orm.exc.UnmappedInstanceError:
         return {'error': 'User not found.'}, 404
 
-    return '', 204
+    return user
 
 
