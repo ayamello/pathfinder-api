@@ -3,6 +3,8 @@ from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+from app.models.subscribers_model import SubscriberModel
+
 
 @jwt_required()
 def create_path():
@@ -70,6 +72,16 @@ def get_all_paths():
     # paginação da rota
     paths = PathModel.query.all()
     #set_trace()
+
+    serializer = [{
+        'id': path.id,
+        'name': path.name,
+        'description': path.description,
+        'initial_date': path.initial_date,
+        'end_date': path.end_date,
+        'duration': path.duration,
+        'subscribers': [{'username': user.users.username} for user in path.subscribers]
+    } for path in paths]
     
     return jsonify(paths), 200
 
@@ -77,6 +89,8 @@ def get_paths_by_user_id(id):
     # tratar lista vazia
     # paginação da rota
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
+
+   
 
     return jsonify(paths_by_user), 200
 
