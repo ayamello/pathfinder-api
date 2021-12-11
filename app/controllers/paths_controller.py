@@ -73,6 +73,7 @@ def get_all_paths():
     paths = PathModel.query.all()
     #set_trace()
 
+    ## Ideia de serialização para mostrar apenas usernames na resposta do get:
     serializer = [{
         'id': path.id,
         'name': path.name,
