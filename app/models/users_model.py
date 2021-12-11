@@ -19,7 +19,7 @@ class UserModel(db.Model):
     name = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(255), nullable=False, unique=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    birthdate = db.Column(db.DateTime, nullable=False)
+    birthdate = db.Column(db.Date, nullable=False)
     url_image = db.Column(db.String)
     password_hash = db.Column(db.String, nullable=False)
 
