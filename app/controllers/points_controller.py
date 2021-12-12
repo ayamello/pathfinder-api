@@ -5,8 +5,7 @@ from app.exceptions.activities_subscribers_exception import NotFoundDataError
 from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
-from sqlalchemy.orm.exc import UnmappedInstanceError
-from sqlalchemy.exc import InvalidRequestError
+
 
 @jwt_required()
 def create_point():
@@ -50,23 +49,28 @@ def create_point():
     except KeyError as err:
         return {'error': {'Verify key':str(err)}}, 400
 
+
 @jwt_required()
-def activities_by_point(id: int):
+def points_by_path(path_id: int):
     try:
-        activities_by_point = PointModel.query.get(id)
-        return {'activities': activities_by_point.activities}, 200
+        path = PathModel.query.get(path_id)
+        
+        return {'points': path.points}, 200
     except AttributeError:
         return {'error': 'Point ID Not Found'}, 404
+    
 
 @jwt_required()
 def update_point(id: int):
+    try:
+        data = request.get_json()
 
-    
-    data = request.get_json()
+        point = update(PointModel, data, id)
 
-    point = update(PointModel, data, id)
+        return point
+    except NotFoundDataError:
+        return {'error': 'Point ID Not Found'}, 404
 
-    return point
 
 @jwt_required()
 def delete_point(id: int):

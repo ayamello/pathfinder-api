@@ -1,4 +1,4 @@
-from flask import request, current_app, jsonify
+from flask import request, jsonify
 from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
@@ -6,9 +6,8 @@ from app.controllers.base_controller import create, delete, get_all, update
 import sqlalchemy
 import psycopg2
 
+
 def create_user():
-
-
     try:
         data = request.get_json()
         
@@ -27,6 +26,7 @@ def create_user():
 
     return jsonify(new_user), 201
 
+
 def login():
     data = request.get_json()
 
@@ -43,16 +43,16 @@ def login():
     else:
         return {'error': 'Unauthorized'}, 401
 
+
 @jwt_required()
 def get_all_users():
-
     users = get_all(UserModel)
 
     return jsonify(users), 200
 
+
 @jwt_required()
 def get_by_id(id):
-
     user = UserModel.query.get(id)
 
     if not user:
@@ -60,9 +60,9 @@ def get_by_id(id):
 
     return jsonify(user), 200
     
+
 @jwt_required()
 def update_user(id):
-    
     try:
         data = request.get_json()
 
@@ -76,9 +76,9 @@ def update_user(id):
 
     return user
 
+
 @jwt_required()
 def delete_user(id):
-
     try:
         user = delete(UserModel, id)
     
@@ -86,5 +86,3 @@ def delete_user(id):
         return {'error': 'User not found.'}, 404
 
     return user
-
-

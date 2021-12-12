@@ -1,9 +1,11 @@
-from flask import request, current_app, jsonify
+from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from app.controllers.base_controller import create, delete, update
 from app.models.activities_model import ActivityModel
 from app.exceptions.activities_subscribers_exception import NotStringError, WrongKeysError, NotFoundDataError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from app.models.points_model import PointModel
+
 
 @jwt_required()
 def create_activity():
@@ -25,9 +27,18 @@ def create_activity():
     except NotStringError as err:
         return jsonify({'error': str(err)}), 400
 
+
+@jwt_required()
+def activities_by_point(path_id: int):
+    try:
+        point = PointModel.query.get(path_id)
+        return {'activities': point.activities}, 200
+    except AttributeError:
+        return {'error': 'Point ID Not Found'}, 404
+
+
 @jwt_required()
 def update_activity(id: int):
-
     try:
         data = request.get_json()
         activity = update(ActivityModel, data, id)
@@ -53,4 +64,3 @@ def delete_activity(id: int):
         return jsonify({'error': str(err)}), 404
 
     return activity
-
