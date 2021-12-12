@@ -1,10 +1,9 @@
-from os import W_OK
 from flask import current_app, jsonify
 from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
 
+
 def create(data, model, password_hash):
-    
     new_item = model(**data)
 
     if model == UserModel:
@@ -15,14 +14,14 @@ def create(data, model, password_hash):
 
     return new_item
 
-def get_all(model):
 
+def get_all(model):
     items = model.query.all()
 
     return items
 
-def update(model, data, id):
 
+def update(model, data, id):
     item = model.query.get(id)
 
     if not item:
@@ -38,6 +37,7 @@ def update(model, data, id):
     updated = model.query.get(id)
 
     return jsonify(updated), 200
+
 
 def delete(model, id):
     item = model.query.get(id)

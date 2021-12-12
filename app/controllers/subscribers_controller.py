@@ -4,6 +4,7 @@ from app.controllers.base_controller import create
 from app.models.subscribers_model import SubscriberModel
 from app.exceptions.activities_subscribers_exception import WrongKeysError, PathOwnerError
 
+
 @jwt_required()
 def create_subscriber():
     try:

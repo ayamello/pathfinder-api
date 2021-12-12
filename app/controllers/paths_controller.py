@@ -1,10 +1,8 @@
-from flask import request, current_app, jsonify
+from flask import request, jsonify
 from app.controllers.base_controller import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
-# from app.models.subscribers_model import SubscriberModel
 
 
 @jwt_required()
@@ -34,6 +32,7 @@ def create_path():
     except:
         return jsonify({'error': 'error'}), 400
 
+
 @jwt_required()
 def delete_path(id):
     try:
@@ -44,8 +43,8 @@ def delete_path(id):
 
     return path
 
-def update_path(id):
 
+def update_path(id):
     # Se não for string 
     # se a string estiver vazia
     # keys incorretas
@@ -57,8 +56,8 @@ def update_path(id):
 
     return path
 
-def get_all_paths():
 
+def get_all_paths():
     paths = get_all(PathModel)
     #  tratar lista vazia
     # paginação da rota
@@ -76,6 +75,7 @@ def get_all_paths():
     } for path in paths]
     
     return jsonify(paths), 200
+
 
 def get_paths_by_user_id(id):
     # tratar lista vazia
