@@ -18,9 +18,6 @@ def create_activity():
 
         return jsonify(new_activity), 201
 
-    except IntegrityError:
-        return {'error': 'Request must contain only, name, description and point_id'}, 400
-
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
