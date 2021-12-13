@@ -5,12 +5,37 @@ from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers.base_controller import create, delete, get_all, update
 import sqlalchemy
 import psycopg2
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib, ssl
+from os import environ
+from ipdb import set_trace
+
+
+def send_email(**kwargs):
+    email = MIMEMultipart()
+    password = environ.get('SMTP_PASS')
+    
+    email['From'] = environ.get('STMP_MAIL')
+    email['To'] = kwargs['email']
+    email['Subject'] = 'Boas vindas'
+
+    message = 'Bem vindo ao PathFinder!'
+
+    email.attach(MIMEText(message, 'plain'))
+    context = ssl.create_default_context()
+    try:
+        with smtplib.SMTP_SSL('smtp.gmail.com', port=465, context=context) as server:
+            server.login(email['From'], password)
+            server.sendmail(email['From'], email['To'], email.as_string())
+    except Exception as e:
+        return str(e), 418
 
 
 def create_user():
     try:
         data = request.get_json()
-        
+        send_email(data)
         password_to_hash = data.pop('password')
         
         new_user = create(data, UserModel, password_to_hash)
