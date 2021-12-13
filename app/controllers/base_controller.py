@@ -2,7 +2,6 @@ from flask import current_app, jsonify
 from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
 
-
 def create(data, model, password_hash):
     new_item = model(**data)
 

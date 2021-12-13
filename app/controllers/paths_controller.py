@@ -5,9 +5,6 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from app.exceptions.path_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from datetime import datetime
-from ipdb import set_trace
-#TODO: Paginação das rotas get
 
 @jwt_required()
 def create_path():
