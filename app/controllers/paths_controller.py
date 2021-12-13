@@ -87,6 +87,7 @@ def update_path(id):
             data.pop('user_id')
 
         path = update(PathModel, data, id)
+        
         return path
 
     except NotFoundDataError as err:
@@ -109,8 +110,8 @@ def get_all_paths():
         'id': path.id,
         'name': path.name,
         'description': path.description,
-        'initial_date': path.initial_date,
-        'end_date': path.end_date,
+        'initial_date': path.initial_date.strftime("%d/%m/%Y"),
+        'end_date': path.end_date.strftime("%d/%m/%Y"),
         'duration': path.duration,
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in paths]
@@ -124,8 +125,8 @@ def get_all_by_page(pg):
         'id': path.id,
         'name': path.name,
         'description': path.description,
-        'initial_date': path.initial_date,
-        'end_date': path.end_date,
+        'initial_date': path.initial_date.strftime("%d/%m/%Y"),
+        'end_date': path.end_date.strftime("%d/%m/%Y"),
         'duration': path.duration,
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in record_query.items]
