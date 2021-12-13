@@ -16,3 +16,18 @@ class NotStringError(Exception):
 
 class NotIntegerError(Exception):
     ...
+
+class EmptyStringError(Exception):
+    ...
+
+class MissingKeyError(Exception):
+    def __init__(self, keys, wrong_keys):
+        self.message = {
+            "required_keys": keys,
+            "missing_key": wrong_keys
+        }
+        
+        super().__init__(self.message)
+
+class DateError(Exception):
+    ...
