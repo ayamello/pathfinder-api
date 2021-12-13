@@ -19,9 +19,11 @@ class UserModel(db.Model):
     name = db.Column(db.String(255), nullable=False)
     username = db.Column(db.String(255), nullable=False, unique=True)
     email = db.Column(db.String(255), nullable=False, unique=True)
-    birthdate = db.Column(db.Date, nullable=False)
+    confirm_email = db.Column(db.Boolean, default=False)
+    birthdate = db.Column(db.DateTime(timezone=True), nullable=False)
     url_image = db.Column(db.String)
     password_hash = db.Column(db.String, nullable=False)
+    password_hash_confirmation = db.Column(db.String)
 
     paths_list = db.relationship('PathModel', backref=backref('user', uselist=False))
 
