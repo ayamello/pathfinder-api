@@ -76,8 +76,8 @@ def delete_path(id):
 
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
-        
-    return "", 200
+
+    return path
 
 
 def update_path(id):
@@ -117,9 +117,40 @@ def get_all_paths():
         'duration': path.duration,
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in paths]
-    
+
     return jsonify(serializer), 200
 
+def get_all_by_page(pg):
+    record_query = PathModel.query.paginate(page=pg, error_out=False, max_per_page=15)
+
+    serializer = [{
+        'id': path.id,
+        'name': path.name,
+        'description': path.description,
+        'initial_date': path.initial_date,
+        'end_date': path.end_date,
+        'duration': path.duration,
+        'subscribers': [{'username': user.users.username} for user in path.subscribers]
+    } for path in record_query.items]
+
+    next_page = f'https://pathfinder-q3.herokuapp.com/paths/page/{record_query.next_num}'
+    prev_page = f'https://pathfinder-q3.herokuapp.com/paths/page/{record_query.prev_num}'
+
+    if not record_query.next_num:
+        next_page = "Empty page"
+    
+    if not record_query.prev_num:
+        prev_page = "Empty page"
+
+    result = dict( total_items=record_query.total, 
+                   current_page=record_query.page,
+                   total_pages=record_query.pages,
+                   per_page=record_query.per_page,
+                   next_page=next_page,
+                   prev_page=prev_page,
+                   data=serializer)
+
+    return jsonify(result), 200
 
 def get_paths_by_user_id(id):
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
