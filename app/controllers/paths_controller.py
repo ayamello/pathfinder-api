@@ -81,7 +81,6 @@ def update_path(id):
 def get_all_paths():
     paths = get_all(PathModel)
 
-    ## Ideia de serialização para mostrar apenas usernames na resposta do get:
     serializer = [{
         'id': path.id,
         'name': path.name,
@@ -92,10 +91,13 @@ def get_all_paths():
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in paths]
     
-    return jsonify(paths), 200
+    return jsonify(serializer), 200
 
 
 def get_paths_by_user_id(id):
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
+    
+    if not paths_by_user:
+        return jsonify({'error': 'Id not found!'}), 404
 
     return jsonify(paths_by_user), 200

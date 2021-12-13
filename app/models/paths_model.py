@@ -34,7 +34,7 @@ class PathModel(db.Model):
 
 	@staticmethod
 	def validate(**kwargs):
-		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'user_id']
+		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'user_id', 'subscribers', 'points']
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
