@@ -1,30 +1,50 @@
 from flask import request, jsonify
-from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError
+from app.exceptions.user_exceptions import EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers.base_controller import create, delete, get_all, update
 import sqlalchemy
-import psycopg2
-
 
 def create_user():
     try:
         data = request.get_json()
-        
+
+        UserModel.validate(**data)
+
         password_to_hash = data.pop('password')
-        
+
         new_user = create(data, UserModel, password_to_hash)
 
-    except sqlalchemy.exc.IntegrityError as e:
-        if type(e.orig) == psycopg2.errors.NotNullViolation:
-            return {'error': 'There are fields missing.'}, 400
+    except WrongKeysError as err:
+        return jsonify({'error': err.message}), 400
 
-        return {'error': 'This user already exists.'}, 409
+    except NotStringError as err:
+        return jsonify({'error': str(err)}), 400
 
-    except TypeError as e:
-        return {'error': 'There are extra fields.'}, 400
+    except EmptyStringError as err:
+        return jsonify({'error': str(err)}), 400
 
-    return jsonify(new_user), 201
+    except UsernameAlreadyExists as err:
+        return jsonify({'error': str(err)}), 409
+
+    except EmailAlreadyExists as err:
+        return jsonify({'error': str(err)}), 409
+
+    except MissingKeyError as err:
+        return jsonify({'error': err.message}), 400
+
+    output = {
+        "id": new_user.id,
+        "name": new_user.name,
+        "username": new_user.username,
+        "email": new_user.email,
+        "birthdate": new_user.birthdate.strftime("%d/%m/%Y"),
+        "url_date": new_user.url_image,
+        "paths_lists": new_user.paths_list
+    }
+
+    return jsonify(output), 201
 
 
 def login():
@@ -75,7 +95,6 @@ def update_user(id):
         return jsonify({'error': e.message}), 400
 
     return user
-
 
 @jwt_required()
 def delete_user(id):

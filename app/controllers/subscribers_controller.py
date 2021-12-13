@@ -18,5 +18,6 @@ def create_subscriber():
 
     except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
+        
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400

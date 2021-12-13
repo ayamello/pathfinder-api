@@ -41,7 +41,7 @@ def create_path():
         return jsonify(result), 201
 
     except IntegrityError:
-        return {'error': 'Request must contain only, name, description and point_id'}, 400
+        return {'error': 'Request must contain only, name, description, initial_date, end_date, duration and user_id'}, 400
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
@@ -64,7 +64,7 @@ def create_path():
 
 
 @jwt_required()
-def delete_path(id):
+def delete_path(id: int):
     try:
         path = delete(PathModel, id)
 
@@ -77,17 +77,17 @@ def delete_path(id):
     return path
 
 
-def update_path(id):
+def update_path(id: int):
     try:
         data = request.get_json()
 
-        validate_data = PathModel.validate(**data)
+        PathModel.validate_update(**data)
 
         if data['user_id']:
             data.pop('user_id')
 
         path = update(PathModel, data, id)
-        
+
         return path
 
     except NotFoundDataError as err:
@@ -118,7 +118,7 @@ def get_all_paths():
 
     return jsonify(serializer), 200
 
-def get_all_by_page(pg):
+def get_all_by_page(pg: int):
     record_query = PathModel.query.paginate(page=pg, error_out=False, max_per_page=15)
 
     serializer = [{
@@ -150,7 +150,7 @@ def get_all_by_page(pg):
 
     return jsonify(result), 200
 
-def get_paths_by_user_id(id):
+def get_paths_by_user_id(id: int):
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
 
     if not paths_by_user:

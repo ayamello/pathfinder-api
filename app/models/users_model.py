@@ -2,6 +2,10 @@ from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, WrongKeysError
+from app.exceptions.user_exceptions import EmailAlreadyExists, UsernameAlreadyExists
+
+
 
 @dataclass
 class UserModel(db.Model):
@@ -36,3 +40,36 @@ class UserModel(db.Model):
 
     def verify_password(self, password_to_compare):
         return check_password_hash(self.password_hash, password_to_compare)
+    
+    @staticmethod
+    def validate(**kwargs):
+        valid_keys = ['name', 'username', 'email', 'birthdate', 'url_image', 'password']
+        required_keys = ['name', 'username', 'email', 'birthdate', 'password']
+        received_keys = [key for key in kwargs.keys()]
+
+        for key in received_keys:
+            if key not in valid_keys:
+                raise WrongKeysError(valid_keys, received_keys)
+            
+            if not type(kwargs[key]) == str:
+                raise NotStringError(f'{key} must be string!')
+
+        for key in required_keys:
+            if not key in received_keys:
+                raise MissingKeyError(required_keys, key)
+
+            if kwargs[key] == '':
+                raise EmptyStringError(f'{key} must not be an empty string!')
+
+        found_user_email: UserModel = UserModel.query.filter_by(email=kwargs['email']).first()
+        found_user_username: UserModel = UserModel.query.filter_by(username=kwargs['username']).first()
+        
+        if found_user_username:
+            raise UsernameAlreadyExists('This username already exists.')
+
+        if found_user_email:
+            raise EmailAlreadyExists('This email already exists.')
+
+        kwargs['name'] = kwargs['name'].title()
+
+        return kwargs

@@ -39,13 +39,13 @@ class PathModel(db.Model):
 		required_keys = ['name', 'description', 'user_id']
 		received_keys = [key for key in kwargs.keys()]
 
-		for key in required_keys:
-			if not key in received_keys:
-				raise MissingKeyError(required_keys, key)
-
 		for key in received_keys:
 			if key not in valid_keys:
 				raise WrongKeysError(valid_keys, received_keys)
+		
+		for key in required_keys:
+			if not key in received_keys:
+				raise MissingKeyError(required_keys, key)
 		
 		for key in received_keys:
 			if key == "user_id":
@@ -53,7 +53,7 @@ class PathModel(db.Model):
 					raise NotIntegerError('user_id must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
-					raise NotStringError(f'{key} must be string!')
+					raise NotStringError(f'key: {key} must be string!')
 		
 		
 		kwargs['name'] = kwargs['name'].title()
@@ -67,4 +67,21 @@ class PathModel(db.Model):
 
 		return value
 	
-	
+	@staticmethod
+	def validate_update(**kwargs):
+		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'user_id', 'subscribers', 'points']
+		received_keys = [key for key in kwargs.keys()]
+
+		for key in received_keys:
+			if key not in valid_keys:
+				raise WrongKeysError(valid_keys, received_keys)
+		
+		for key in received_keys:
+			if key == "user_id":
+				if not type(kwargs[key]) == int:
+					raise NotIntegerError('user_id must be an integer!')
+			else:
+				if not type(kwargs[key]) == str:
+					raise NotStringError(f'key: {key} must be string!')
+
+		return kwargs
