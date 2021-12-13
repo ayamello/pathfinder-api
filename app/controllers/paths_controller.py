@@ -2,7 +2,12 @@ from flask import request, jsonify
 from app.controllers.base_controller import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
+from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from app.exceptions.path_exceptions import NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
+
+#TODO: Paginação das rotas get
+#TODO: Regra de negócio para o end date
 
 @jwt_required()
 def create_path():
@@ -28,8 +33,17 @@ def create_path():
         
         return jsonify(result), 201
 
-    except:
-        return jsonify({'error': 'error'}), 400
+    except IntegrityError:
+        return {'error': 'Request must contain only, name, description and point_id'}, 400
+
+    except WrongKeysError as err:
+        return jsonify({'error': err.message}), 400
+
+    except NotStringError as err:
+        return jsonify({'error': str(err)}), 400
+    
+    except NotIntegerError as err:
+        return jsonify({'error': str(err)}), 400
 
 
 @jwt_required()
@@ -44,23 +58,28 @@ def delete_path(id):
 
 
 def update_path(id):
-    # Se não for string 
-    # se a string estiver vazia
-    # keys incorretas
-    # não poderia trocar o user_id
-    # end date não pode ser uma data antes, só depois
-    data = request.get_json()
+    try:
+        data = request.get_json()
+        validate_data = PathModel.validate(**data)
 
-    path = update(PathModel, data, id)
+        if data['user_id']:
+            data.pop('user_id')
 
-    return path
+        path = update(PathModel, data, id)
+        return path
+
+    except NotFoundDataError as e:
+        return jsonify({'error': str(e)}), 404
+
+    except WrongKeysError as e:
+        return jsonify({'error': e.message}), 400
+
+    except InvalidRequestError as err:
+        return jsonify({'error': str(err)}), 400
 
 
 def get_all_paths():
     paths = get_all(PathModel)
-    #  tratar lista vazia
-    # paginação da rota
-    #set_trace()
 
     ## Ideia de serialização para mostrar apenas usernames na resposta do get:
     serializer = [{
@@ -77,14 +96,6 @@ def get_all_paths():
 
 
 def get_paths_by_user_id(id):
-    # tratar lista vazia
-    # paginação da rota
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
 
-   
-
     return jsonify(paths_by_user), 200
-
-# update
-# get by id do usuario
-# get geralzao

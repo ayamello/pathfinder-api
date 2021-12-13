@@ -10,3 +10,9 @@ class WrongKeysError(Exception):
 
 class NotFoundDataError(Exception):
     ...
+
+class NotStringError(Exception):
+    ...
+
+class NotIntegerError(Exception):
+    ...
