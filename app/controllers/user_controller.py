@@ -19,7 +19,7 @@ def send_email(**kwargs):
     email['To'] = kwargs['email']
     email['Subject'] = 'Boas vindas'
 
-    message = 'Bem vindo(a) ao PathFinder, {}!'.format(kwargs['username'])
+    message = 'Bem vindo(a) ao PathFinder, {}! Click here to login to the website https://pathfinder-q3.herokuapp.com/login'.format(kwargs['username'])
     
     email.attach(MIMEText(message, 'plain'))
     context = ssl.create_default_context()
