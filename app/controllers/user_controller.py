@@ -4,11 +4,37 @@ from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers.__init__ import create, delete, get_all, update
 import sqlalchemy
+import psycopg2
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import smtplib, ssl
+from os import environ
+
+
+def send_email(**kwargs):
+    email = MIMEMultipart()
+    password = environ.get('SMTP_PASS')
+    
+    email['From'] = environ.get('STMP_MAIL')
+    email['To'] = kwargs['email']
+    email['Subject'] = 'Boas vindas'
+
+
+    message = 'Bem vindo(a) ao PathFinder, {}! Click here to validade your acount - https://pathfinder-q3.vercel.app/confirmation/{}'.format(kwargs['username'], kwargs['email'])
+    
+    email.attach(MIMEText(message, 'plain'))
+    context = ssl.create_default_context()
+  
+    with smtplib.SMTP_SSL('smtp.gmail.com', port=465, context=context) as server:
+        server.login(email['From'], password)
+        server.sendmail(email['From'], email['To'], email.as_string())
+
 
 def create_user():
     try:
         data = request.get_json()
 
+        send_email(**data)
         UserModel.validate(**data)
 
         password_to_hash = data.pop('password')
@@ -47,12 +73,21 @@ def create_user():
 
 
 def login():
+    
+    activate = request.args.get('activate')
+
     data = request.get_json()
 
     found_user: UserModel = UserModel.query.filter_by(email=data['email']).first()
-
     if not found_user:
         return {'error': 'User not found'}, 404
+
+    if activate:
+        found_user.confirm_email = True
+
+    if found_user.confirm_email == False:
+        return {'error': 'Please activate your account'}, 409
+    
 
     if found_user.verify_password(data['password']):
         access_token = create_access_token(identity=found_user)

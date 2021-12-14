@@ -1,3 +1,4 @@
+from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from app.exceptions.base_exceptions import NotStringError, WrongKeysError
@@ -7,7 +8,7 @@ from app.exceptions.base_exceptions import NotStringError, WrongKeysError
 class ActivityModel(db.Model):
     name: str 
     description: str
-    # reviews: list
+    reviews: list
 
     __tablename__ = 'activities'
 
@@ -20,7 +21,7 @@ class ActivityModel(db.Model):
         db.ForeignKey('points.id'),
         nullable=False,
     )
-    # reviews = db.relationship('ReviewModel')
+    reviews = db.relationship('ReviewModel', backref=backref('activity', uselist=False))
 
 
     @staticmethod
