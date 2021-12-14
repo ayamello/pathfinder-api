@@ -24,7 +24,7 @@ class PathModel(db.Model):
 	initial_date = db.Column(db.DateTime(timezone=True))
 	end_date = db.Column(db.DateTime(timezone=True))
 	duration = db.Column(db.Integer)
-	user_id = db.Column(
+	admin_id = db.Column(
 		db.Integer,
 		db.ForeignKey('users.id'),
 		nullable=False,
