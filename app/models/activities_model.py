@@ -7,7 +7,7 @@ from app.exceptions.activities_subscribers_exception import NotStringError, Wron
 class ActivityModel(db.Model):
     name: str 
     description: str
-    reviews: list
+    # reviews: list
 
     __tablename__ = 'activities'
 
@@ -20,7 +20,7 @@ class ActivityModel(db.Model):
         db.ForeignKey('points.id'),
         nullable=False,
     )
-    reviews = db.relationship('ReviewModel')
+    # reviews = db.relationship('ReviewModel')
 
 
     @staticmethod

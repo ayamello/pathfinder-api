@@ -18,27 +18,29 @@ def send_email(**kwargs):
     
     email['From'] = environ.get('STMP_MAIL')
     email['To'] = kwargs['email']
-    email['Subject'] = 'Boas vindas'
+    email['Subject'] = 'Boas vindas 13/12'
 
     message = 'Bem vindo ao PathFinder!'
-
+    
     email.attach(MIMEText(message, 'plain'))
     context = ssl.create_default_context()
-    try:
-        with smtplib.SMTP_SSL('smtp.gmail.com', port=465, context=context) as server:
-            server.login(email['From'], password)
-            server.sendmail(email['From'], email['To'], email.as_string())
-    except Exception as e:
-        return str(e), 418
+  
+    with smtplib.SMTP_SSL('smtp.gmail.com', port=465, context=context) as server:
+        server.login(email['From'], password)
+        server.sendmail(email['From'], email['To'], email.as_string())
 
 
 def create_user():
     try:
         data = request.get_json()
-        send_email(data)
+
+        send_email(**data)
+
         password_to_hash = data.pop('password')
         
         new_user = create(data, UserModel, password_to_hash)
+
+        
 
     except sqlalchemy.exc.IntegrityError as e:
         if type(e.orig) == psycopg2.errors.NotNullViolation:
