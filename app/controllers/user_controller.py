@@ -2,7 +2,7 @@ from flask import request, jsonify
 from app.exceptions.activities_subscribers_exception import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
-from app.controllers.base_controller import create, delete, get_all, update
+from app.controllers.__init__ import create, delete, get_all, update
 import sqlalchemy
 import psycopg2
 
