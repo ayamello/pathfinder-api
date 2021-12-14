@@ -2,6 +2,7 @@ from flask import Flask
 from environs import Env
 from app.configs import database, migrations, jwt, smtp_gmail
 from app import routes
+from flask_cors import CORS
 
 env = Env()
 env.read_env()
@@ -9,6 +10,7 @@ env.read_env()
 
 def create_app():
     app = Flask(__name__)
+    CORS(app)
 
     app.config["SQLALCHEMY_DATABASE_URI"] = env("SQLALCHEMY_DATABASE_URI")
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

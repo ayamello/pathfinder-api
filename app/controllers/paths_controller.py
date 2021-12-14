@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from app.controllers.base_controller import create, delete, get_all, update
+from app.controllers.__init__ import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError

@@ -1,6 +1,6 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
-from app.controllers.base_controller import create, delete, update
+from app.controllers.__init__ import create, delete, update
 from app.models.activities_model import ActivityModel
 from app.exceptions.base_exceptions import NotStringError, WrongKeysError, NotFoundDataError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
@@ -17,9 +17,6 @@ def create_activity():
         new_activity = create(validated_data, ActivityModel, '')
 
         return jsonify(new_activity), 201
-
-    except IntegrityError:
-        return {'error': 'Request must contain only, name, description and point_id'}, 400
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
