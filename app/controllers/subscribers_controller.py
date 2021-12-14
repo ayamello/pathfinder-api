@@ -1,8 +1,8 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
-from app.controllers.base_controller import create
+from app.controllers.__init__ import create
 from app.models.subscribers_model import SubscriberModel
-from app.exceptions.activities_subscribers_exception import WrongKeysError, PathOwnerError
+from app.exceptions.base_exceptions import WrongKeysError, PathOwnerError
 
 
 @jwt_required()
@@ -18,5 +18,6 @@ def create_subscriber():
 
     except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
+        
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400

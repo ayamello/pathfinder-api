@@ -1,7 +1,7 @@
 from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
-from app.exceptions.activities_subscribers_exception import NotStringError, WrongKeysError
+from app.exceptions.base_exceptions import NotStringError, WrongKeysError
 
 
 @dataclass

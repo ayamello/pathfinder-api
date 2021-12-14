@@ -1,6 +1,6 @@
 from app.configs.database import db
 from dataclasses import dataclass
-
+from app.exceptions.base_exceptions import NotIntegerError, NotStringError, WrongKeysError
 
 @dataclass
 class AddressModel(db.Model):
@@ -23,3 +23,22 @@ class AddressModel(db.Model):
     country = db.Column(db.String(50))
     postal_code = db.Column(db.String(50))
     coordenadas = db.Column(db.String(255))
+
+    @staticmethod
+    def validate(**kwargs):
+        required_keys = ['street', 'number', 'city', 'state', 'country', 'postal_code', 'coordenadas']
+        received_keys = [key for key in kwargs.keys()]
+
+        for key in required_keys:
+            if key not in received_keys:
+                raise WrongKeysError(required_keys, received_keys)
+            
+            if key == "number":
+                if not type(kwargs[key]) == int:
+                    raise NotIntegerError('key: number must be an integer')
+                
+            else:
+                if not type(kwargs[key]) == str:
+                    raise NotStringError(f'key: {key} must be string!')
+            
+        return kwargs
