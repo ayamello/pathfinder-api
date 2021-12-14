@@ -1,7 +1,7 @@
 from app.configs.database import db
 from dataclasses import dataclass
 from app.models.users_model import UserModel
-from app.exceptions.activities_subscribers_exception import PathOwnerError, WrongKeysError
+from app.exceptions.base_exceptions import PathOwnerError, WrongKeysError
 
 
 @dataclass

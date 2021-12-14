@@ -1,9 +1,9 @@
 from flask import request, jsonify
-from app.controllers.base_controller import create, delete, get_all, update
+from app.controllers.__init__ import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from app.exceptions.path_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
+from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 @jwt_required()
@@ -41,7 +41,7 @@ def create_path():
         return jsonify(result), 201
 
     except IntegrityError:
-        return {'error': 'Request must contain only, name, description and point_id'}, 400
+        return {'error': 'Request must contain only, name, description, initial_date, end_date, duration and user_id'}, 400
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
@@ -64,7 +64,7 @@ def create_path():
 
 
 @jwt_required()
-def delete_path(id):
+def delete_path(id: int):
     try:
         path = delete(PathModel, id)
 
@@ -76,18 +76,18 @@ def delete_path(id):
 
     return path
 
-
-def update_path(id):
+@jwt_required()
+def update_path(id: int):
     try:
         data = request.get_json()
 
-        validate_data = PathModel.validate(**data)
+        PathModel.validate_update(**data)
 
         if data['user_id']:
             data.pop('user_id')
 
         path = update(PathModel, data, id)
-        
+
         return path
 
     except NotFoundDataError as err:
@@ -102,7 +102,7 @@ def update_path(id):
     except EmptyStringError as err:
         return jsonify({'error': str(err)}), 400
 
-
+@jwt_required()
 def get_all_paths():
     paths = get_all(PathModel)
 
@@ -118,7 +118,8 @@ def get_all_paths():
 
     return jsonify(serializer), 200
 
-def get_all_by_page(pg):
+@jwt_required()
+def get_all_by_page(pg: int):
     record_query = PathModel.query.paginate(page=pg, error_out=False, max_per_page=15)
 
     serializer = [{
@@ -150,7 +151,8 @@ def get_all_by_page(pg):
 
     return jsonify(result), 200
 
-def get_paths_by_user_id(id):
+@jwt_required()
+def get_paths_by_user_id(id: int):
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
 
     if not paths_by_user:
