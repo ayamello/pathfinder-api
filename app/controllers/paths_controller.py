@@ -76,7 +76,7 @@ def delete_path(id: int):
 
     return path
 
-
+@jwt_required()
 def update_path(id: int):
     try:
         data = request.get_json()
@@ -102,7 +102,7 @@ def update_path(id: int):
     except EmptyStringError as err:
         return jsonify({'error': str(err)}), 400
 
-
+@jwt_required()
 def get_all_paths():
     paths = get_all(PathModel)
 
@@ -118,6 +118,7 @@ def get_all_paths():
 
     return jsonify(serializer), 200
 
+@jwt_required()
 def get_all_by_page(pg: int):
     record_query = PathModel.query.paginate(page=pg, error_out=False, max_per_page=15)
 
@@ -149,7 +150,8 @@ def get_all_by_page(pg: int):
                    data=serializer)
 
     return jsonify(result), 200
-
+    
+@jwt_required()
 def get_paths_by_user_id(id: int):
     paths_by_user = PathModel.query.filter_by(user_id=id).all()
 
