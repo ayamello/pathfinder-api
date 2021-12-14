@@ -40,7 +40,7 @@ class PointModel(db.Model):
 		for key in received_keys:
 			if key == "duration" or key == "address_id":
 				if not type(kwargs[key]) == int:
-					raise NotIntegerError('user_id must be an integer!')
+					raise NotIntegerError(f'key: {key} must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
 					raise NotStringError(f'key: {key} must be string!')
@@ -59,7 +59,7 @@ class PointModel(db.Model):
 		for key in received_keys:
 			if key == "duration" or key == "address_id":
 				if not type(kwargs[key]) == int:
-					raise NotIntegerError('user_id must be an integer!')
+					raise NotIntegerError(f'key: {key} must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
 					raise NotStringError(f'key: {key} must be string!')

@@ -79,7 +79,7 @@ class PathModel(db.Model):
 		for key in received_keys:
 			if key == "user_id":
 				if not type(kwargs[key]) == int:
-					raise NotIntegerError('user_id must be an integer!')
+					raise NotIntegerError('key: user_id must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
 					raise NotStringError(f'key: {key} must be string!')
