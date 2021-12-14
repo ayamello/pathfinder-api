@@ -19,7 +19,8 @@ def send_email(**kwargs):
     email['To'] = kwargs['email']
     email['Subject'] = 'Boas vindas'
 
-    message = 'Bem vindo(a) ao PathFinder, {}! Click here to login to the website https://pathfinder-q3.herokuapp.com/login'.format(kwargs['username'])
+
+    message = 'Bem vindo(a) ao PathFinder, {}! Click here to validade your acount - https://pathfinder-q3.vercel.app/confirmation/{}'.format(kwargs['username'], kwargs['email'])
     
     email.attach(MIMEText(message, 'plain'))
     context = ssl.create_default_context()
@@ -54,12 +55,21 @@ def create_user():
 
 
 def login():
+    
+    activate = request.args.get('activate')
+
     data = request.get_json()
 
     found_user: UserModel = UserModel.query.filter_by(email=data['email']).first()
-
     if not found_user:
         return {'error': 'User not found'}, 404
+
+    if activate:
+        found_user.confirm_email = True
+
+    if found_user.confirm_email == False:
+        return {'error': 'Please activate your account'}, 409
+    
 
     if found_user.verify_password(data['password']):
         access_token = create_access_token(identity=found_user)
