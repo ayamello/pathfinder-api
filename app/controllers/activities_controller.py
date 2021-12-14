@@ -2,7 +2,7 @@ from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from app.controllers.base_controller import create, delete, update
 from app.models.activities_model import ActivityModel
-from app.exceptions.activities_subscribers_exception import NotStringError, WrongKeysError, NotFoundDataError
+from app.exceptions.base_exceptions import NotStringError, WrongKeysError, NotFoundDataError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
 from app.models.points_model import PointModel
 

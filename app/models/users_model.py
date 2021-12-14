@@ -2,10 +2,7 @@ from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, WrongKeysError
-from app.exceptions.user_exceptions import EmailAlreadyExists, UsernameAlreadyExists
-
-
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 
 @dataclass
 class UserModel(db.Model):

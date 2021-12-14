@@ -1,4 +1,3 @@
-from sqlalchemy.orm.mapper import validates
 from app.configs.database import db
 from dataclasses import dataclass
 from app.exceptions.base_exceptions import NotIntegerError, NotStringError, WrongKeysError

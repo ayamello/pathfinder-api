@@ -3,7 +3,7 @@ from app.controllers.base_controller import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from app.exceptions.path_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
+from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 @jwt_required()
@@ -150,7 +150,7 @@ def get_all_by_page(pg: int):
                    data=serializer)
 
     return jsonify(result), 200
-    
+
 @jwt_required()
 def get_paths_by_user_id(id: int):
     paths_by_user = PathModel.query.filter_by(user_id=id).all()

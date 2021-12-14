@@ -1,7 +1,7 @@
 from app.configs.database import db
 from sqlalchemy.orm import validates
 from dataclasses import dataclass
-from app.exceptions.path_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError
 from app.models.points_paths_table import points_paths
 import re
 

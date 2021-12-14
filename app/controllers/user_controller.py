@@ -1,6 +1,5 @@
 from flask import request, jsonify
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError
-from app.exceptions.user_exceptions import EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers.base_controller import create, delete, get_all, update
