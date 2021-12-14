@@ -19,7 +19,7 @@ def send_email(**kwargs):
     email['To'] = kwargs['email']
     email['Subject'] = 'Boas vindas'
 
-    message = 'Bem vindo(a) ao PathFinder!'
+    message = 'Bem vindo(a) ao PathFinder, {}!'.format(kwargs['username'])
     
     email.attach(MIMEText(message, 'plain'))
     context = ssl.create_default_context()
