@@ -23,7 +23,7 @@ class UserModel(db.Model):
     birthdate = db.Column(db.DateTime(timezone=True), nullable=False)
     url_image = db.Column(db.String)
     password_hash = db.Column(db.String, nullable=False)
-    password_hash_confirmation = db.Column(db.String)
+    password_hash_confirmation = db.Column(db.String, nullable=False)
 
     paths_list = db.relationship('PathModel', backref=backref('user', uselist=False))
 
