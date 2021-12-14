@@ -9,7 +9,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
-from ipdb import set_trace
 
 
 def send_email(**kwargs):
@@ -18,9 +17,9 @@ def send_email(**kwargs):
     
     email['From'] = environ.get('STMP_MAIL')
     email['To'] = kwargs['email']
-    email['Subject'] = 'Boas vindas 13/12'
+    email['Subject'] = 'Boas vindas'
 
-    message = 'Bem vindo ao PathFinder!'
+    message = 'Bem vindo(a) ao PathFinder!'
     
     email.attach(MIMEText(message, 'plain'))
     context = ssl.create_default_context()
