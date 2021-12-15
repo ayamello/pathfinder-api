@@ -3,13 +3,12 @@ from flask import request, jsonify
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
-from app.controllers.__init__ import create, delete, get_all, update
+from app.controllers import create, delete, get_all, update
 import sqlalchemy
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
-
 
 def send_email(**kwargs):
     email = MIMEMultipart()
@@ -111,7 +110,7 @@ def get_by_id(id):
     user = UserModel.query.get(id)
 
     if not user:
-        return {'error': 'User not found.'}, 404
+        return {'error': 'User ID not found.'}, 404
 
     return jsonify(user), 200
     
@@ -125,11 +124,11 @@ def update_user(id):
 
         user = update(UserModel, data, id)
 
-    except NotFoundDataError as e:
-        return jsonify({'error': str(e)}), 404
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
 
-    except WrongKeysError as e:
-        return jsonify({'error': e.message}), 400
+    except WrongKeysError as err:
+        return jsonify({'error': err.message}), 400
 
     return user
 

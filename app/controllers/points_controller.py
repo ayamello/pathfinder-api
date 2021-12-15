@@ -2,7 +2,7 @@ from flask import request, current_app, jsonify
 from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required
 import sqlalchemy
-from app.controllers.base_controller import create, delete, update
+from app.controllers import create, delete, update
 from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
@@ -19,9 +19,9 @@ def create_point():
         data_address = {
             'street': data['street'],
             'number': data['number'],
-            'city': data['city'],
-            'state': data['state'],
-            'country': data['country'],
+            'city': data['city'].title(),
+            'state': data['state'].title(),
+            'country': data['country'].title(),
             'postal_code': data['postal_code'],
             'coordenadas': data['coordenadas']
         }

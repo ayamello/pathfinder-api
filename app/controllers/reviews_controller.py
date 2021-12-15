@@ -1,7 +1,7 @@
 from flask import request, jsonify
 from datetime import datetime, timezone
-from flask_jwt_extended import jwt_required
-from app.controllers.__init__ import create, delete, update
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.controllers import create, delete, update
 from app.models.reviews_model import ReviewModel
 from app.models.activities_model import ActivityModel
 from app.exceptions.base_exceptions import NotStringError, WrongKeysError, NotFoundDataError
@@ -13,7 +13,13 @@ def create_review():
     try:
         data = request.get_json()
 
-        new_review = create(data, ReviewModel, '')
+        current_user = get_jwt_identity()
+
+        data['name'] = current_user['username']
+
+        validated_data = ReviewModel.validate(**data)
+
+        new_review = create(validated_data, ReviewModel, '')
 
         return jsonify(new_review), 201
 
@@ -22,6 +28,9 @@ def create_review():
 
     except NotStringError as err:
         return jsonify({'error': str(err)}), 400
+    
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
 
 
 @jwt_required()

@@ -1,7 +1,8 @@
 from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import NotStringError, WrongKeysError
+from app.models.points_model import PointModel
+from app.exceptions.base_exceptions import NotFoundDataError, NotStringError, WrongKeysError
 from datetime import datetime, timezone
 
 
@@ -41,6 +42,11 @@ class ActivityModel(db.Model):
         
         if not type(kwargs['name']) == str:
             raise NotStringError('name must be string!')
+        
+        current_point = PointModel.query.get(kwargs['point_id'])
+
+        if not current_point:
+            raise NotFoundDataError('Point ID not found!')
 
         kwargs['name']=kwargs['name'].title()
 

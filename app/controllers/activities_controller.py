@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from flask import request, jsonify, current_app
 from flask_jwt_extended import jwt_required
-from app.controllers.__init__ import create, delete, update
+from app.controllers import create, delete, update
 from app.models.activities_model import ActivityModel
 from app.exceptions.base_exceptions import NotStringError, WrongKeysError, NotFoundDataError
 from sqlalchemy.exc import InvalidRequestError
@@ -30,6 +30,9 @@ def create_activity():
 
     except NotStringError as err:
         return jsonify({'error': str(err)}), 400
+
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
 
 
 @jwt_required()
