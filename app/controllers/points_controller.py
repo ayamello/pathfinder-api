@@ -1,4 +1,5 @@
 from flask import request, current_app, jsonify
+from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required
 import sqlalchemy
 from app.controllers.base_controller import create, delete, update
@@ -51,6 +52,8 @@ def create_point():
             "initial_date": point.initial_date.strftime("%d/%m/%Y"),
             "end_date": point.end_date.strftime("%d/%m/%Y"),
             "duration": point.duration,
+            "created_at": point.created_at,
+            "updated_at": point.updated_at,
             "activities": point.activities
         }
         return jsonify(output), 201
@@ -84,6 +87,8 @@ def points_by_path(path_id: int):
 def update_point(id: int):
     try:
         data = request.get_json()
+        data['updated_at'] = datetime.now(timezone.utc)
+        
         PointModel.validate_update(**data)
         point = update(PointModel, data, id)
 

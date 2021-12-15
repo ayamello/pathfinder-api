@@ -1,6 +1,8 @@
 from app.configs.database import db
 from dataclasses import dataclass
 from app.exceptions.base_exceptions import NotIntegerError, NotStringError, WrongKeysError
+from datetime import datetime, timezone
+
 
 @dataclass
 class PointModel(db.Model):
@@ -10,6 +12,8 @@ class PointModel(db.Model):
 	initial_date: str
 	end_date: str
 	duration: str
+	created_at: str
+	updated_at: str
 	activities: list
 
 	__tablename__ = 'points'
@@ -20,6 +24,8 @@ class PointModel(db.Model):
 	initial_date = db.Column(db.Date)
 	end_date = db.Column(db.Date)
 	duration = db.Column(db.Integer)
+	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	address_id = db.Column(
 	  db.Integer,
 	  db.ForeignKey('addresses.id'),

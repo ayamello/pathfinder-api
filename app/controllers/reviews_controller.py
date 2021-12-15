@@ -1,4 +1,5 @@
 from flask import request, jsonify
+from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required
 from app.controllers.__init__ import create, delete, update
 from app.models.reviews_model import ReviewModel
@@ -38,6 +39,9 @@ def reviews_by_activity(activity_id: int):
 def update_review(id: int):
     try:
         data = request.get_json()
+
+        data['updated_at'] = datetime.now(timezone.utc)
+
         review = update(ReviewModel, data, id)
 
     except NotFoundDataError as e:
