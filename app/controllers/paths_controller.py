@@ -4,7 +4,7 @@ from app.controllers.__init__ import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import IntegrityError, InvalidRequestError
-from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
+from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
 @jwt_required()
@@ -12,11 +12,11 @@ def create_path():
     try:
         data = request.get_json()
         current_user = get_jwt_identity()
-        data['user_id'] = current_user['id']
+        data['admin_id'] = current_user['id']
 
         validated_data = PathModel.validate(**data)
         
-        path = create(data, PathModel, '')
+        path = create(validated_data, PathModel, '')
         
         diff = path.end_date - path.initial_date
 
@@ -68,7 +68,11 @@ def create_path():
 
 @jwt_required()
 def delete_path(id: int):
+    current_user = get_jwt_identity()
+    admin_id = current_user['id']
+
     try:
+        PathModel.validate_owner(admin_id, id)
         path = delete(PathModel, id)
 
     except UnmappedInstanceError:
@@ -77,18 +81,22 @@ def delete_path(id: int):
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
 
+    except PathOwnerError as err:
+        return jsonify({'error': str(err)}), 400
+
     return path
 
 @jwt_required()
 def update_path(id: int):
+    data = request.get_json()
+    current_user = get_jwt_identity()
+    admin_id = current_user['id']
+    
     try:
         data = request.get_json()
         data['updated_at'] = datetime.now(timezone.utc)
-        
+        PathModel.validate_owner(admin_id, id)
         PathModel.validate_update(**data)
-
-        if data['user_id']:
-            data.pop('user_id')
 
         path = update(PathModel, data, id)
 
@@ -104,6 +112,9 @@ def update_path(id: int):
         return jsonify({'error': str(err)}), 400
     
     except EmptyStringError as err:
+        return jsonify({'error': str(err)}), 400
+    
+    except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
 
 @jwt_required()
@@ -161,7 +172,7 @@ def get_all_by_page(pg: int):
 
 @jwt_required()
 def get_paths_by_user_id(id: int):
-    paths_by_user = PathModel.query.filter_by(user_id=id).all()
+    paths_by_user = PathModel.query.filter_by(admin_id=id).all()
 
     if not paths_by_user:
         return jsonify({'error': 'There are no paths in this user ID'}), 404

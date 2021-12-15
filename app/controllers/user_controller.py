@@ -10,7 +10,6 @@ from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
 
-
 def send_email(**kwargs):
     email = MIMEMultipart()
     password = environ.get('SMTP_PASS')
