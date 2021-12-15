@@ -1,58 +1,55 @@
+from flask import request, jsonify
 from datetime import datetime, timezone
-from flask import request, jsonify, current_app
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.controllers import create, delete, update
+from app.models.reviews_model import ReviewModel
 from app.models.activities_model import ActivityModel
 from app.exceptions.base_exceptions import NotStringError, WrongKeysError, NotFoundDataError
 from sqlalchemy.exc import InvalidRequestError
-from app.models.points_model import PointModel
 
 
 @jwt_required()
-def create_activity():
+def create_review():
     try:
         data = request.get_json()
-    
-        validated_data = ActivityModel.validate(**data)
 
-        new_activity = create(validated_data, ActivityModel, '')
-        
-        point_id = data['point_id']
-        point = PointModel.query.get(point_id)
-        point.activities.append(new_activity)
-            
-        current_app.db.session.commit()
+        current_user = get_jwt_identity()
 
-        return jsonify(new_activity), 201
+        data['name'] = current_user['username']
+
+        validated_data = ReviewModel.validate(**data)
+
+        new_review = create(validated_data, ReviewModel, '')
+
+        return jsonify(new_review), 201
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
     except NotStringError as err:
         return jsonify({'error': str(err)}), 400
-
+    
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
 
 
 @jwt_required()
-def activities_by_point(point_id: int):
+def reviews_by_activity(activity_id: int):
     try:
-        point = PointModel.query.get(point_id)
-
-        return {'activities': point.activities}, 200
-
+        activity = ActivityModel.query.get(activity_id)
+        return {'reviews': activity.reviews}, 200
     except AttributeError:
-        return {'error': 'Point ID Not Found'}, 404
+        return {'error': 'Activity ID Not Found'}, 404
 
 
 @jwt_required()
-def update_activity(id: int):
+def update_review(id: int):
     try:
         data = request.get_json()
+
         data['updated_at'] = datetime.now(timezone.utc)
-        
-        activity = update(ActivityModel, data, id)
+
+        review = update(ReviewModel, data, id)
 
     except NotFoundDataError as e:
         return jsonify({'error': str(e)}), 404
@@ -63,15 +60,15 @@ def update_activity(id: int):
     except InvalidRequestError as err:
         return jsonify({'error': str(err)}), 400
 
-    return activity
+    return review
 
 
 @jwt_required()
-def delete_activity(id: int):
+def delete_review(id: int):
     try:
-        activity = delete(ActivityModel, id)
+        review = delete(ReviewModel, id)
 
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
 
-    return activity
+    return review
