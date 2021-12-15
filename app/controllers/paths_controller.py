@@ -7,6 +7,7 @@ from sqlalchemy.exc import InvalidRequestError
 from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
+
 @jwt_required()
 def create_path():
     try:
@@ -22,7 +23,6 @@ def create_path():
 
         if diff.days < 0:
             raise DateError('The final date must be after initial date!')
-        
         elif diff.days == 0:
             raise DateError('The dates must not be in the same day!')
         
@@ -35,12 +35,14 @@ def create_path():
             "duration": path.duration,
             "created_at": path.created_at,
             "updated_at": path.updated_at,
-            "user": {
+            "admin_user": {
                 "name": path.user.name,
                 "email": path.user.email
-            }
+            },
+            "points": path.points,
+            "subscribers": path.subscribers
         }
-        
+
         return jsonify(output), 201
 
     except WrongKeysError as err:
@@ -48,19 +50,18 @@ def create_path():
 
     except NotStringError as err:
         return jsonify({'error': str(err)}), 400
-    
+
     except NotIntegerError as err:
         return jsonify({'error': str(err)}), 400
 
     except EmptyStringError as err:
         return jsonify({'error': str(err)}), 400
-    
+
     except MissingKeyError as err:
         return jsonify({'error': err.message}), 400
 
     except DateError as err:
         return jsonify({'error': str(err)}), 400
-      
 
 
 @jwt_required()
@@ -107,12 +108,13 @@ def update_path(id: int):
 
     except InvalidRequestError as err:
         return jsonify({'error': str(err)}), 400
-    
+
     except EmptyStringError as err:
         return jsonify({'error': str(err)}), 400
     
     except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
+
 
 @jwt_required()
 def get_all_paths():
@@ -127,15 +129,21 @@ def get_all_paths():
         'duration': path.duration,
         "created_at": path.created_at,
         "updated_at": path.updated_at,
+        "admin_user": {
+                "name": path.user.name,
+                "email": path.user.email
+        },
+        'points': [point for point in path.points],
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in paths]
-
+    
     return jsonify(serializer), 200
+
 
 @jwt_required()
 def get_all_by_page(pg: int):
     record_query = PathModel.query.paginate(page=pg, error_out=False, max_per_page=15)
-
+    
     serializer = [{
         'id': path.id,
         'name': path.name,
@@ -147,25 +155,25 @@ def get_all_by_page(pg: int):
         "updated_at": path.updated_at,
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in record_query.items]
-
+    
     next_page = f'https://pathfinder-q3.herokuapp.com/paths/page/{record_query.next_num}'
     prev_page = f'https://pathfinder-q3.herokuapp.com/paths/page/{record_query.prev_num}'
-
+    
     if not record_query.next_num:
         next_page = "Empty page"
-    
     if not record_query.prev_num:
         prev_page = "Empty page"
-
-    result = dict( total_items=record_query.total, 
+    
+    result = dict( total_items=record_query.total,
                    current_page=record_query.page,
                    total_pages=record_query.pages,
                    per_page=record_query.per_page,
                    next_page=next_page,
                    prev_page=prev_page,
                    data=serializer)
-
+    
     return jsonify(result), 200
+
 
 @jwt_required()
 def get_paths_by_user_id(id: int):
@@ -173,5 +181,5 @@ def get_paths_by_user_id(id: int):
 
     if not paths_by_user:
         return jsonify({'error': 'There are no paths in this user ID'}), 404
-
+        
     return jsonify(paths_by_user), 200

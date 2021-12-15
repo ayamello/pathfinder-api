@@ -8,11 +8,13 @@ from datetime import datetime, timezone
 
 @dataclass
 class ActivityModel(db.Model):
+    id: int
     name: str 
     description: str
     created_at: str
     updated_at: str
     reviews: list
+    point_id: int
 
     __tablename__ = 'activities'
 

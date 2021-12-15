@@ -17,8 +17,6 @@ def create_review():
 
         data['name'] = current_user['username']
 
-        print(data)
-
         validated_data = ReviewModel.validate(**data)
 
         new_review = create(validated_data, ReviewModel, '')

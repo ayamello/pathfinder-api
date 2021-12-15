@@ -7,10 +7,16 @@ from app.models.activities_model import ActivityModel
 
 @dataclass
 class ReviewModel(db.Model):
+<<<<<<< HEAD
+    id: int
+    name: str
+=======
     username: str
+>>>>>>> develop
     review: str
     created_at: str
     updated_at: str
+    activity_id: int
    
     __tablename__ = 'reviews'
 

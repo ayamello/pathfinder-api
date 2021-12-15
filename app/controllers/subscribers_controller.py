@@ -1,5 +1,6 @@
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
+from flask_jwt_extended.utils import get_jwt_identity
 from app.controllers import create
 from app.models.subscribers_model import SubscriberModel
 from app.exceptions.base_exceptions import NotFoundDataError, WrongKeysError, PathOwnerError
@@ -9,6 +10,9 @@ from app.exceptions.base_exceptions import NotFoundDataError, WrongKeysError, Pa
 def create_subscriber():
     try:
         data = request.get_json()
+        current_user = get_jwt_identity()
+
+        data['user_id'] = current_user['id']
         
         validated_data = SubscriberModel.validate(**data)
 
