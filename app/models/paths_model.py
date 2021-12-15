@@ -1,9 +1,9 @@
 from app.configs.database import db
 from sqlalchemy.orm import validates
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from app.models.points_paths_table import points_paths
-import re
+from datetime import datetime, timezone
 
 @dataclass
 class PathModel(db.Model):
@@ -13,6 +13,8 @@ class PathModel(db.Model):
 	initial_date: str
 	end_date: str
 	duration: str
+	created_at: str
+	updated_at: str
 	subscribers: list
 	points: list
 
@@ -24,6 +26,8 @@ class PathModel(db.Model):
 	initial_date = db.Column(db.DateTime(timezone=True))
 	end_date = db.Column(db.DateTime(timezone=True))
 	duration = db.Column(db.Integer)
+	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	admin_id = db.Column(
 		db.Integer,
 		db.ForeignKey('users.id'),
@@ -35,8 +39,8 @@ class PathModel(db.Model):
 
 	@staticmethod
 	def validate(**kwargs):
-		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'user_id', 'subscribers', 'points']
-		required_keys = ['name', 'description', 'user_id']
+		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'admin_id', 'subscribers', 'points']
+		required_keys = ['name', 'description', 'admin_id']
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
@@ -48,9 +52,9 @@ class PathModel(db.Model):
 				raise MissingKeyError(required_keys, key)
 		
 		for key in received_keys:
-			if key == "user_id":
+			if key == "admin_id":
 				if not type(kwargs[key]) == int:
-					raise NotIntegerError('key: user_id must be an integer!')
+					raise NotIntegerError('key: admin_id must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
 					raise NotStringError(f'key: {key} must be string!')
@@ -60,7 +64,7 @@ class PathModel(db.Model):
 
 		return kwargs
 	
-	@validates('name', 'description', 'user_id')
+	@validates('name', 'description', 'admin_id')
 	def validate_not_null(self, key, value):
 		if value == '':
 			raise EmptyStringError(f'{key} must not be an empty string!')
@@ -69,7 +73,7 @@ class PathModel(db.Model):
 	
 	@staticmethod
 	def validate_update(**kwargs):
-		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'user_id', 'subscribers', 'points']
+		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'admin_id', 'subscribers', 'points']
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
@@ -77,11 +81,20 @@ class PathModel(db.Model):
 				raise WrongKeysError(valid_keys, received_keys)
 		
 		for key in received_keys:
-			if key == "user_id":
+			if key == "admin_id":
 				if not type(kwargs[key]) == int:
-					raise NotIntegerError('key: user_id must be an integer!')
+					raise NotIntegerError('key: admin_id must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
 					raise NotStringError(f'key: {key} must be string!')
 
 		return kwargs
+	
+	@staticmethod
+	def validate_owner(admin_id: int, path_id: int):
+		path = PathModel.query.get(path_id)
+		print(path)
+		if not path.admin_id == admin_id:
+			raise PathOwnerError('user cannot update or delete a path that does not belong to them.')
+
+		return admin_id, path_id

@@ -1,11 +1,14 @@
 from app.configs.database import db
 from dataclasses import dataclass
+from datetime import datetime, timezone
 
 
 @dataclass
 class ReviewModel(db.Model):
     name: str
     review: str
+    created_at: str
+    updated_at: str
    
     __tablename__ = 'reviews'
 
@@ -17,6 +20,5 @@ class ReviewModel(db.Model):
       db.ForeignKey('activities.id'),
       nullable=False,
     )
-
-
-
+    created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))

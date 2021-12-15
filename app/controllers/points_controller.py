@@ -1,4 +1,5 @@
 from flask import request, current_app, jsonify
+from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required
 import sqlalchemy
 from app.controllers.__init__ import create, delete, update
@@ -16,9 +17,9 @@ def create_point():
         data_address = {
             'street': data['street'],
             'number': data['number'],
-            'city': data['city'],
-            'state': data['state'],
-            'country': data['country'],
+            'city': data['city'].title(),
+            'state': data['state'].title(),
+            'country': data['country'].title(),
             'postal_code': data['postal_code'],
             'coordenadas': data['coordenadas']
         }
@@ -28,7 +29,7 @@ def create_point():
         AddressModel.query.filter(AddressModel.street==address.street, AddressModel.number==address.number).first()
         
         data_point = {
-            'name': data['name'],
+            'name': data['name'].title(),
             'description': data['description'],
             'initial_date':data['initial_date'],
             'end_date': data['end_date'],
@@ -51,6 +52,8 @@ def create_point():
             "initial_date": point.initial_date.strftime("%d/%m/%Y"),
             "end_date": point.end_date.strftime("%d/%m/%Y"),
             "duration": point.duration,
+            "created_at": point.created_at,
+            "updated_at": point.updated_at,
             "activities": point.activities
         }
         return jsonify(output), 201
@@ -84,6 +87,8 @@ def points_by_path(path_id: int):
 def update_point(id: int):
     try:
         data = request.get_json()
+        data['updated_at'] = datetime.now(timezone.utc)
+        
         PointModel.validate_update(**data)
         point = update(PointModel, data, id)
 

@@ -1,9 +1,10 @@
+from datetime import datetime, timezone
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from app.controllers.__init__ import create, delete, update
 from app.models.activities_model import ActivityModel
 from app.exceptions.base_exceptions import NotStringError, WrongKeysError, NotFoundDataError
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError
 from app.models.points_model import PointModel
 
 
@@ -38,6 +39,8 @@ def activities_by_point(path_id: int):
 def update_activity(id: int):
     try:
         data = request.get_json()
+        data['updated_at'] = datetime.now(timezone.utc)
+        
         activity = update(ActivityModel, data, id)
 
     except NotFoundDataError as e:
