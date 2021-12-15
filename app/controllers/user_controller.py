@@ -34,7 +34,7 @@ def create_user():
     try:
         data = request.get_json()
 
-        # send_email(**data)
+        send_email(**data)
         UserModel.validate(**data)
 
         password_to_hash = data.pop('password')
@@ -75,8 +75,7 @@ def create_user():
 
 
 def login():
-    
-    # activate = request.args.get('activate')
+    activate = request.args.get('activate')
 
     data = request.get_json()
 
@@ -84,11 +83,11 @@ def login():
     if not found_user:
         return {'error': 'User not found'}, 404
 
-    # if activate:
-    #     found_user.confirm_email = True
+    if activate:
+        found_user.confirm_email = True
 
-    # if found_user.confirm_email == False:
-    #     return {'error': 'Please activate your account'}, 409
+    if found_user.confirm_email == False:
+        return {'error': 'Please activate your account'}, 409
     
 
     if found_user.verify_password(data['password']):

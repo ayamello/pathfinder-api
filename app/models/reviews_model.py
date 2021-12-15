@@ -5,10 +5,12 @@ from datetime import datetime, timezone
 
 @dataclass
 class ReviewModel(db.Model):
+    id: int
     name: str
     review: str
     created_at: str
     updated_at: str
+    activity_id: int
    
     __tablename__ = 'reviews'
 

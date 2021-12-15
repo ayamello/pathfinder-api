@@ -13,9 +13,7 @@ def create_review():
     try:
         data = request.get_json()
 
-        validated_data = ReviewModel.validate(**data)
-
-        new_review = create(validated_data, ReviewModel, '')
+        new_review = create(data, ReviewModel, '')
 
         return jsonify(new_review), 201
 
