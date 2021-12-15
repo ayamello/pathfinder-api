@@ -1,7 +1,8 @@
 from app.configs.database import db
 from dataclasses import dataclass
 from app.models.users_model import UserModel
-from app.exceptions.base_exceptions import PathOwnerError, WrongKeysError
+from app.models.paths_model import PathModel
+from app.exceptions.base_exceptions import NotFoundDataError, PathOwnerError, WrongKeysError
 
 
 @dataclass
@@ -31,9 +32,14 @@ class SubscriberModel(db.Model):
     def validate(**kwargs):
       valid_keys = ['user_id', 'path_id']
       received_keys = [keys for keys in kwargs.keys()]
-
+    
       if not received_keys == valid_keys:
         raise WrongKeysError(valid_keys, received_keys)
+
+      current_path = PathModel.query.get(kwargs['path_id'])
+      
+      if not current_path:
+        raise NotFoundDataError('Path ID not found!')
 
       current_user = UserModel.query.get(kwargs['user_id'])
       user_path = [path.id for path in current_user.paths_list if path.id == kwargs['path_id']]

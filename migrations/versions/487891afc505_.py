@@ -1,8 +1,8 @@
-"""Create tables
+"""empty message
 
-Revision ID: 700024a0162a
+Revision ID: 487891afc505
 Revises: 
-Create Date: 2021-12-14 21:51:56.641372
+Create Date: 2021-12-15 11:28:43.036533
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '700024a0162a'
+revision = '487891afc505'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -50,7 +50,7 @@ def upgrade():
     sa.Column('description', sa.String(length=255), nullable=False),
     sa.Column('initial_date', sa.DateTime(timezone=True), nullable=True),
     sa.Column('end_date', sa.DateTime(timezone=True), nullable=True),
-    sa.Column('duration', sa.Integer(), nullable=True),
+    sa.Column('duration', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('admin_id', sa.Integer(), nullable=False),
@@ -63,7 +63,7 @@ def upgrade():
     sa.Column('description', sa.String(length=255), nullable=False),
     sa.Column('initial_date', sa.Date(), nullable=True),
     sa.Column('end_date', sa.Date(), nullable=True),
-    sa.Column('duration', sa.Integer(), nullable=True),
+    sa.Column('duration', sa.String(length=255), nullable=True),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('updated_at', sa.DateTime(timezone=True), nullable=True),
     sa.Column('address_id', sa.Integer(), nullable=False),
@@ -98,7 +98,7 @@ def upgrade():
     )
     op.create_table('reviews',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('name', sa.String(length=255), nullable=False),
+    sa.Column('username', sa.String(length=255), nullable=False),
     sa.Column('review', sa.String(), nullable=False),
     sa.Column('activity_id', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(timezone=True), nullable=True),

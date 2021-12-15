@@ -25,7 +25,7 @@ class PathModel(db.Model):
 	description = db.Column(db.String(255), nullable=False)
 	initial_date = db.Column(db.DateTime(timezone=True))
 	end_date = db.Column(db.DateTime(timezone=True))
-	duration = db.Column(db.Integer)
+	duration = db.Column(db.String(255))
 	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	admin_id = db.Column(
@@ -44,7 +44,7 @@ class PathModel(db.Model):
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
-			if key not in valid_keys:
+			if not key in valid_keys:
 				raise WrongKeysError(valid_keys, received_keys)
 		
 		for key in required_keys:
@@ -52,7 +52,7 @@ class PathModel(db.Model):
 				raise MissingKeyError(required_keys, key)
 		
 		for key in received_keys:
-			if key == "admin_id":
+			if key == 'admin_id':
 				if not type(kwargs[key]) == int:
 					raise NotIntegerError('key: admin_id must be an integer!')
 			else:
@@ -77,11 +77,11 @@ class PathModel(db.Model):
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
-			if key not in valid_keys:
+			if not key in valid_keys:
 				raise WrongKeysError(valid_keys, received_keys)
 		
 		for key in received_keys:
-			if key == "admin_id":
+			if key == 'admin_id':
 				if not type(kwargs[key]) == int:
 					raise NotIntegerError('key: admin_id must be an integer!')
 			else:

@@ -23,7 +23,7 @@ class PointModel(db.Model):
 	description = db.Column(db.String(255), nullable=False)
 	initial_date = db.Column(db.Date)
 	end_date = db.Column(db.Date)
-	duration = db.Column(db.Integer)
+	duration = db.Column(db.String(255))
 	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	address_id = db.Column(
@@ -40,11 +40,11 @@ class PointModel(db.Model):
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in required_keys:
-			if key not in received_keys:
+			if not key in received_keys:
 				raise WrongKeysError(required_keys, received_keys)
 		
 		for key in received_keys:
-			if key == "duration" or key == "address_id":
+			if key == 'address_id':
 				if not type(kwargs[key]) == int:
 					raise NotIntegerError(f'key: {key} must be an integer!')
 			else:
@@ -59,11 +59,11 @@ class PointModel(db.Model):
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
-			if key not in valid_keys:
+			if not key in valid_keys:
 				raise WrongKeysError(valid_keys, received_keys)
 		
 		for key in received_keys:
-			if key == "duration" or key == "address_id":
+			if key == 'duration' or key == 'address_id':
 				if not type(kwargs[key]) == int:
 					raise NotIntegerError(f'key: {key} must be an integer!')
 			else:
