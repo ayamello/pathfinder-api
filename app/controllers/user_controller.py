@@ -4,7 +4,6 @@ from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers.__init__ import create, delete, get_all, update
 import sqlalchemy
-import psycopg2
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl

@@ -15,7 +15,7 @@ def create_path():
 
         validated_data = PathModel.validate(**data)
         
-        path = create(data, PathModel, '')
+        path = create(validated_data, PathModel, '')
         
         diff = path.end_date - path.initial_date
 

@@ -16,9 +16,9 @@ def create_point():
         data_address = {
             'street': data['street'],
             'number': data['number'],
-            'city': data['city'],
-            'state': data['state'],
-            'country': data['country'],
+            'city': data['city'].title(),
+            'state': data['state'].title(),
+            'country': data['country'].title(),
             'postal_code': data['postal_code'],
             'coordenadas': data['coordenadas']
         }
@@ -28,7 +28,7 @@ def create_point():
         AddressModel.query.filter(AddressModel.street==address.street, AddressModel.number==address.number).first()
         
         data_point = {
-            'name': data['name'],
+            'name': data['name'].title(),
             'description': data['description'],
             'initial_date':data['initial_date'],
             'end_date': data['end_date'],
