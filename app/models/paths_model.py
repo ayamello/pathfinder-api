@@ -3,7 +3,8 @@ from sqlalchemy.orm import validates
 from dataclasses import dataclass
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError
 from app.models.points_paths_table import points_paths
-import re
+from datetime import datetime, timezone
+
 
 @dataclass
 class PathModel(db.Model):
@@ -13,6 +14,8 @@ class PathModel(db.Model):
 	initial_date: str
 	end_date: str
 	duration: str
+	created_at: str
+	updated_at: str
 	subscribers: list
 	points: list
 
@@ -24,6 +27,8 @@ class PathModel(db.Model):
 	initial_date = db.Column(db.DateTime(timezone=True))
 	end_date = db.Column(db.DateTime(timezone=True))
 	duration = db.Column(db.Integer)
+	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
 	admin_id = db.Column(
 		db.Integer,
 		db.ForeignKey('users.id'),

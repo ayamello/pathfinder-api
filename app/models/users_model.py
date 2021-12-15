@@ -3,6 +3,8 @@ from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from datetime import datetime, timezone
+
 
 @dataclass
 class UserModel(db.Model):
@@ -12,6 +14,8 @@ class UserModel(db.Model):
     email: str
     birthdate: str
     url_image: str
+    created_at: str
+    updated_at: str
     paths_list: list
 
     __tablename__ = 'users'
@@ -24,6 +28,8 @@ class UserModel(db.Model):
     birthdate = db.Column(db.DateTime(timezone=True), nullable=False)
     url_image = db.Column(db.String)
     password_hash = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     paths_list = db.relationship('PathModel', backref=backref('user', uselist=False))
 
