@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from flask import request, jsonify
 from app.controllers.__init__ import create, delete, get_all, update
 from app.models.paths_model import PathModel
@@ -25,20 +26,22 @@ def create_path():
         elif diff.days == 0:
             raise DateError('The dates must not be in the same day!')
         
-        result = {
+        output = {
             "id": path.id,
             "name": path.name,
             "description": path.description,
             "initial_date": path.initial_date.strftime("%d/%m/%Y"),
             "end_date": path.end_date.strftime("%d/%m/%Y"),
             "duration": path.duration,
+            "created_at": path.created_at,
+            "updated_at": path.updated_at,
             "user": {
                 "name": path.user.name,
                 "email": path.user.email
             }
         }
         
-        return jsonify(result), 201
+        return jsonify(output), 201
 
     except IntegrityError:
         return {'error': 'Request must contain only, name, description, initial_date, end_date, duration and user_id'}, 400
@@ -85,12 +88,13 @@ def delete_path(id: int):
 
 @jwt_required()
 def update_path(id: int):
-
     data = request.get_json()
     current_user = get_jwt_identity()
     admin_id = current_user['id']
     
     try:
+        data = request.get_json()
+        data['updated_at'] = datetime.now(timezone.utc)
         PathModel.validate_owner(admin_id, id)
         PathModel.validate_update(**data)
 
@@ -124,6 +128,8 @@ def get_all_paths():
         'initial_date': path.initial_date.strftime("%d/%m/%Y"),
         'end_date': path.end_date.strftime("%d/%m/%Y"),
         'duration': path.duration,
+        "created_at": path.created_at,
+        "updated_at": path.updated_at,
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in paths]
 
@@ -140,6 +146,8 @@ def get_all_by_page(pg: int):
         'initial_date': path.initial_date.strftime("%d/%m/%Y"),
         'end_date': path.end_date.strftime("%d/%m/%Y"),
         'duration': path.duration,
+        "created_at": path.created_at,
+        "updated_at": path.updated_at,
         'subscribers': [{'username': user.users.username} for user in path.subscribers]
     } for path in record_query.items]
 

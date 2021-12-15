@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from flask import request, jsonify
 from flask_jwt_extended import jwt_required
 from app.controllers.__init__ import create, delete, update
@@ -38,6 +39,8 @@ def activities_by_point(path_id: int):
 def update_activity(id: int):
     try:
         data = request.get_json()
+        data['updated_at'] = datetime.now(timezone.utc)
+        
         activity = update(ActivityModel, data, id)
 
     except NotFoundDataError as e:
