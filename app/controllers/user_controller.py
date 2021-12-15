@@ -1,10 +1,10 @@
+from datetime import datetime, timezone
 from flask import request, jsonify
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers.__init__ import create, delete, get_all, update
 import sqlalchemy
-import psycopg2
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
@@ -121,6 +121,8 @@ def get_by_id(id):
 def update_user(id):
     try:
         data = request.get_json()
+        
+        data['updated_at'] = datetime.now(timezone.utc)
 
         user = update(UserModel, data, id)
 
