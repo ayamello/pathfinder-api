@@ -1,7 +1,7 @@
 from app.configs.database import db
 from sqlalchemy.orm import validates
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from app.models.points_paths_table import points_paths
 
 @dataclass
@@ -84,3 +84,12 @@ class PathModel(db.Model):
 					raise NotStringError(f'key: {key} must be string!')
 
 		return kwargs
+	
+	@staticmethod
+	def validate_owner(admin_id: int, path_id: int):
+		path = PathModel.query.get(path_id)
+		print(path)
+		if not path.admin_id == admin_id:
+			raise PathOwnerError('user cannot update or delete a path that does not belong to them.')
+
+		return admin_id, path_id
