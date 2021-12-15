@@ -11,7 +11,7 @@ def create_path():
     try:
         data = request.get_json()
         current_user = get_jwt_identity()
-        data['user_id'] = current_user['id']
+        data['admin_id'] = current_user['id']
 
         validated_data = PathModel.validate(**data)
         
@@ -37,7 +37,7 @@ def create_path():
                 "email": path.user.email
             }
         }
-        
+
         return jsonify(result), 201
 
     except IntegrityError:
