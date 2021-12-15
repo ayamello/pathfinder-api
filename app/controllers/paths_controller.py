@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 from flask import request, jsonify
-from app.controllers.__init__ import create, delete, get_all, update
+from app.controllers import create, delete, get_all, update
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from sqlalchemy.exc import IntegrityError, InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError
 from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -42,9 +42,6 @@ def create_path():
         }
         
         return jsonify(output), 201
-
-    except IntegrityError:
-        return {'error': 'Request must contain only, name, description, initial_date, end_date, duration and user_id'}, 400
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400

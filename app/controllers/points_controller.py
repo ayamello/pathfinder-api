@@ -2,7 +2,7 @@ from flask import request, current_app, jsonify
 from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required
 import sqlalchemy
-from app.controllers.__init__ import create, delete, update
+from app.controllers import create, delete, update
 from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
