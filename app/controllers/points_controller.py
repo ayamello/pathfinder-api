@@ -95,7 +95,7 @@ def points_by_path(path_id: int):
 def update_point(id: int):
     try:
         data = request.get_json()
-        # data['updated_at'] = datetime.now(timezone.utc)
+        data['updated_at'] = datetime.now(timezone.utc)
 
         PointModel.validate_update(**data)
         point = update(PointModel, data, id)

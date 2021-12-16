@@ -2,6 +2,7 @@ from app.configs.database import db
 from dataclasses import dataclass
 from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, WrongKeysError
 from sqlalchemy.orm import validates
+from datetime import datetime, timezone
 
 @dataclass
 class PointModel(db.Model):
@@ -20,7 +21,9 @@ class PointModel(db.Model):
 	description = db.Column(db.String(255), nullable=False)
 	initial_date = db.Column(db.Date)
 	end_date = db.Column(db.Date)
-	duration = db.Column(db.Integer)
+	duration = db.Column(db.String(255))
+	created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+	updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 	address_id = db.Column(
 	  db.Integer,
 	  db.ForeignKey('addresses.id'),
