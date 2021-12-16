@@ -1,9 +1,8 @@
 from datetime import datetime, timezone
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, NotFoundDataError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
 from flask import request, jsonify, current_app
-from flask_jwt_extended.utils import get_jwt_identity
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
 from app.models.users_model import UserModel
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.controllers import create, delete, get_all, update
 import sqlalchemy
 from email.mime.multipart import MIMEMultipart
@@ -59,6 +58,12 @@ def create_user():
 
     except MissingKeyError as err:
         return jsonify({'error': err.message}), 400
+    
+    except InvalidPasswordLength as err:
+        return jsonify({'error': str(err)}), 400
+    
+    except sqlalchemy.exc.DataError:
+        return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
 
     except PasswordConfirmationDontMatch as err:
         return jsonify({'error': str(err)}), 400
@@ -127,10 +132,16 @@ def get_by_id(id):
 def update_user(id):
     try:
         data = request.get_json()
-        
+        current_user = get_jwt_identity()
+        admin_id = current_user['id']
+
+        UserModel.validate_user(admin_id, id)
+        UserModel.validate_update(**data)
+
         data['updated_at'] = datetime.now(timezone.utc)
 
         user = update(UserModel, data, id)
+        return user
 
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
@@ -138,7 +149,14 @@ def update_user(id):
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
-    return user
+    except UsernameAlreadyExists as err:
+        return jsonify({'error': str(err)}), 409
+
+    except EmailAlreadyExists as err:
+        return jsonify({'error': str(err)}), 409
+
+    except UserOwnerError as err:
+        return jsonify({'error': str(err)}), 400
 
 @jwt_required()
 def delete_user(id):
@@ -149,9 +167,17 @@ def delete_user(id):
         return {"error": "Unauthorized action"}
 
     try:
+        current_user = get_jwt_identity()
+        admin_id = current_user['id']
+
+        UserModel.validate_user(admin_id, id)
         user = delete(UserModel, id)
-    
+        return user
+
     except sqlalchemy.orm.exc.UnmappedInstanceError:
         return {'error': 'User not found.'}, 404
+    
+    except UserOwnerError as err:
+        return jsonify({'error': str(err)}), 400
 
-    return user
+    

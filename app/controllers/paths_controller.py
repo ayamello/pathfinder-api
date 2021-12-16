@@ -2,11 +2,11 @@ from datetime import datetime, timezone
 from flask import request, jsonify
 from app.controllers import create, delete, get_all, update
 from app.models.paths_model import PathModel
+import sqlalchemy
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError
 from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
-
 
 @jwt_required()
 def create_path():
@@ -18,20 +18,27 @@ def create_path():
         validated_data = PathModel.validate(**data)
         
         path = create(validated_data, PathModel, '')
-        
-        diff = path.end_date - path.initial_date
 
-        if diff.days < 0:
-            raise DateError('The final date must be after initial date!')
-        elif diff.days == 0:
-            raise DateError('The dates must not be in the same day!')
-        
+        initial_date = ""
+        end_date = ""
+
+        if not path.initial_date == None and not path.end_date == None: 
+            diff = path.end_date - path.initial_date
+
+            if diff.days < 0:
+                raise DateError('The final date must be after initial date!')
+            elif diff.days == 0:
+                raise DateError('The dates must not be in the same day!')
+
+            initial_date = path.initial_date.strftime("%d/%m/%Y")
+            end_date = path.end_date.strftime("%d/%m/%Y")
+
         output = {
             "id": path.id,
             "name": path.name,
             "description": path.description,
-            "initial_date": path.initial_date.strftime("%d/%m/%Y"),
-            "end_date": path.end_date.strftime("%d/%m/%Y"),
+            "initial_date": initial_date,
+            "end_date": end_date,
             "duration": path.duration,
             "created_at": path.created_at,
             "updated_at": path.updated_at,
@@ -62,6 +69,9 @@ def create_path():
 
     except DateError as err:
         return jsonify({'error': str(err)}), 400
+    
+    except sqlalchemy.exc.DataError:
+        return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
 
 
 @jwt_required()

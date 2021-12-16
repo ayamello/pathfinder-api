@@ -1,8 +1,9 @@
 from app.configs.database import db
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import NotIntegerError, NotStringError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
+from sqlalchemy.orm import validates
 from datetime import datetime, timezone
-
+from app.models.users_model import UserModel
 
 @dataclass
 class PointModel(db.Model):
@@ -12,8 +13,6 @@ class PointModel(db.Model):
 	initial_date: str
 	end_date: str
 	duration: str
-	created_at: str
-	updated_at: str
 	activities: list
 
 	__tablename__ = 'points'
@@ -39,12 +38,12 @@ class PointModel(db.Model):
 		required_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'address_id']
 		received_keys = [key for key in kwargs.keys()]
 
-		for key in required_keys:
-			if not key in received_keys:
+		for key in received_keys:
+			if key not in required_keys:
 				raise WrongKeysError(required_keys, received_keys)
 		
 		for key in received_keys:
-			if key == 'address_id':
+			if key == "duration" or key == "address_id":
 				if not type(kwargs[key]) == int:
 					raise NotIntegerError(f'key: {key} must be an integer!')
 			else:
@@ -55,19 +54,35 @@ class PointModel(db.Model):
 
 	@staticmethod
 	def validate_update(**kwargs):
-		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'address_id']
+		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'address_id', 'updated_at', 'created_at']
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
-			if not key in valid_keys:
+			if key not in valid_keys:
 				raise WrongKeysError(valid_keys, received_keys)
 		
 		for key in received_keys:
-			if key == 'duration' or key == 'address_id':
+			if key == "duration" or key == "address_id":
 				if not type(kwargs[key]) == int:
 					raise NotIntegerError(f'key: {key} must be an integer!')
-			else:
-				if not type(kwargs[key]) == str:
-					raise NotStringError(f'key: {key} must be string!')
 
 		return kwargs
+
+	@validates('name', 'description', 'address_id')
+	def validate_not_null(self, key, value):
+		if value == '':
+			raise EmptyStringError(f'{key} must not be an empty string!')
+
+		return value
+	
+	@staticmethod
+	def validate_user(user_id, point_id):
+		current_user = UserModel.query.get(user_id)
+		user_paths = [path for path in current_user.paths_list]
+		
+		for path in user_paths:
+			for point in path.points:
+				if point.id == point_id:
+					return user_id, point_id
+				
+		raise PathOwnerError('you need to be the path owner to update or delete a point!')
