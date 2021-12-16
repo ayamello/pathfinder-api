@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 from flask import request, jsonify, current_app
 from flask_jwt_extended.utils import get_jwt_identity
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers import create, delete, get_all, update
@@ -36,12 +36,12 @@ def create_user():
         data = request.get_json()
 
         send_email(**data)
-        UserModel.validate(**data)
 
-        password_to_hash = data.pop('password')
-
-        new_user = create(data, UserModel, password_to_hash)
-
+        validated_data = UserModel.validate(**data)
+        
+        password_to_hash = validated_data.pop('password')
+        new_user = create(validated_data, UserModel, password_to_hash)
+        
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
@@ -59,6 +59,9 @@ def create_user():
 
     except MissingKeyError as err:
         return jsonify({'error': err.message}), 400
+
+    except PasswordConfirmationDontMatch as err:
+        return jsonify({'error': str(err)}), 400
 
     output = {
         "id": new_user.id,
