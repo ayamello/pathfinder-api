@@ -7,6 +7,7 @@ from app.models.activities_model import ActivityModel
 
 @dataclass
 class ReviewModel(db.Model):
+    id: int
     username: str
     review: str
     created_at: str
@@ -22,8 +23,8 @@ class ReviewModel(db.Model):
       db.ForeignKey('activities.id'),
       nullable=False,
     )
-    created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 
     @staticmethod
     def validate(**kwargs):
