@@ -653,7 +653,6 @@ No body
 `POST /paths/points/activities/reviews - Request format`
 ```json
 {
-	"name": "5 stars",
 	"review": "The beach is amazing, it was the best day",
 	"activity_id": 1
 }

@@ -5,6 +5,7 @@ from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, No
 from app.models.points_paths_table import points_paths
 from datetime import datetime, timezone
 
+
 @dataclass
 class PathModel(db.Model):
 	id: int
