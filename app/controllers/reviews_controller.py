@@ -15,7 +15,7 @@ def create_review():
 
         current_user = get_jwt_identity()
 
-        data['name'] = current_user['username']
+        data['username'] = current_user['username']
 
         validated_data = ReviewModel.validate(**data)
 
@@ -37,7 +37,9 @@ def create_review():
 def reviews_by_activity(activity_id: int):
     try:
         activity = ActivityModel.query.get(activity_id)
+
         return {'reviews': activity.reviews}, 200
+        
     except AttributeError:
         return {'error': 'Activity ID Not Found'}, 404
 
@@ -51,16 +53,16 @@ def update_review(id: int):
 
         review = update(ReviewModel, data, id)
 
-    except NotFoundDataError as e:
-        return jsonify({'error': str(e)}), 404
+        return review
 
-    except WrongKeysError as e:
-        return jsonify({'error': e.message}), 400
+    except WrongKeysError as err:
+        return jsonify({'error': err.message}), 400
 
     except InvalidRequestError as err:
         return jsonify({'error': str(err)}), 400
 
-    return review
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
 
 
 @jwt_required()
@@ -68,7 +70,8 @@ def delete_review(id: int):
     try:
         review = delete(ReviewModel, id)
 
+        return review
+
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
 
-    return review

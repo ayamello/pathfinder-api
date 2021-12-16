@@ -11,7 +11,6 @@ class UserModel(db.Model):
     name: str
     username: str
     email: str
-    confirm_email: str
     birthdate: str
     url_image: str
     created_at: str

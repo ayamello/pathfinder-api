@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from datetime import datetime, timezone
 
+
 @dataclass
 class PathModel(db.Model):
 	id: int

@@ -18,7 +18,9 @@ def create_activity():
         new_activity = create(validated_data, ActivityModel, '')
         
         point_id = data['point_id']
+
         point = PointModel.query.get(point_id)
+
         point.activities.append(new_activity)
             
         current_app.db.session.commit()
@@ -50,20 +52,22 @@ def activities_by_point(point_id: int):
 def update_activity(id: int):
     try:
         data = request.get_json()
+
         data['updated_at'] = datetime.now(timezone.utc)
         
         activity = update(ActivityModel, data, id)
 
-    except NotFoundDataError as e:
-        return jsonify({'error': str(e)}), 404
+        return activity
 
-    except WrongKeysError as e:
-        return jsonify({'error': e.message}), 400
+    except WrongKeysError as err:
+        return jsonify({'error': err.message}), 400
 
     except InvalidRequestError as err:
         return jsonify({'error': str(err)}), 400
+    
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
 
-    return activity
 
 
 @jwt_required()
@@ -71,7 +75,8 @@ def delete_activity(id: int):
     try:
         activity = delete(ActivityModel, id)
 
+        return activity
+        
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
 
-    return activity
