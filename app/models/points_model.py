@@ -13,6 +13,8 @@ class PointModel(db.Model):
 	initial_date: str
 	end_date: str
 	duration: str
+	address_id: int
+	path_id: int
 	activities: list
 
 	__tablename__ = 'points'
@@ -30,6 +32,11 @@ class PointModel(db.Model):
 	  db.ForeignKey('addresses.id'),
 	  nullable=False,
 	)
+	path_id = db.Column(
+        db.Integer,
+        db.ForeignKey('paths.id'),
+        nullable=False,
+    )
 
 	activities = db.relationship('ActivityModel', backref='point', cascade='all, delete-orphan')
 

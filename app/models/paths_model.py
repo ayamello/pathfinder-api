@@ -2,9 +2,8 @@ from app.configs.database import db
 from sqlalchemy.orm import validates
 from dataclasses import dataclass
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
-from app.models.points_paths_table import points_paths
 from datetime import datetime, timezone
-from ipdb import set_trace
+
 @dataclass
 class PathModel(db.Model):
 	id: int
@@ -35,8 +34,8 @@ class PathModel(db.Model):
 	)
 
 	subscribers = db.relationship('SubscriberModel', cascade='all, delete-orphan')
-	points = db.relationship('PointModel', secondary=points_paths, backref='paths_list')
-
+	points = db.relationship('PointModel', backref='path', cascade='all, delete-orphan')
+	
 	@staticmethod
 	def validate(**kwargs):
 		valid_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'admin_id', 'subscribers', 'points']
