@@ -7,6 +7,7 @@ from app.models.activities_model import ActivityModel
 
 @dataclass
 class ReviewModel(db.Model):
+    id: int
     username: str
     review: str
     created_at: str
@@ -33,7 +34,7 @@ class ReviewModel(db.Model):
         
         if not valid_keys == received_keys:
             raise WrongKeysError(valid_keys, received_keys)
-        
+
         if not type(kwargs['name']) == str:
             raise NotStringError('name must be string!')
         

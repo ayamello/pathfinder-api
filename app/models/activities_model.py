@@ -8,11 +8,13 @@ from datetime import datetime, timezone
 
 @dataclass
 class ActivityModel(db.Model):
+    id: int
     name: str 
     description: str
     created_at: str
     updated_at: str
     reviews: list
+    point_id: int
 
     __tablename__ = 'activities'
 
@@ -20,8 +22,8 @@ class ActivityModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(255), nullable=False)
     description = db.Column(db.String(255), nullable=False)
-    created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
-    updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+    created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+    updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
     point_id = db.Column(
         db.Integer,
         db.ForeignKey('points.id'),
