@@ -27,8 +27,10 @@ def create_point():
         }
         
         keys_data = list(data.keys())
+        data_address_keys = ['street', 'number', 'city', 'state', 'country', 'postal_code', 'coordenadas']
+        
         for key in keys_data:
-            if key=='street' or key =='number' or key=='city' or key=='state' or key=='country' or key=='postal_code' or key=='coordenadas':
+            if key in data_address_keys:
                 data.pop(key)
             
         AddressModel.validate(**data_address)
@@ -49,21 +51,8 @@ def create_point():
             point.initial_date = point.initial_date.strftime("%d/%m/%Y")
         if keys_data.count('end_date') > 0:
             point.initial_date = point.end_date.strftime("%d/%m/%Y")
-            
-        output = {
-            "id": point.id,
-            "name": point.name,
-            "description": point.description,
-            "initial_date": point.initial_date,
-            "end_date": point.end_date,
-            "duration": point.duration,
-            "created_at": point.created_at,
-            "updated_at": point.updated_at,
-            "activities": point.activities,
-            "address_id": point.address_id
-        }
 
-        return jsonify(output), 201
+        return jsonify(point), 201
 
     except KeyError as err:
         return {'error': {'Verify key':str(err)}}, 400
