@@ -2,9 +2,9 @@ from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from datetime import datetime, timezone
-
+from ipdb import set_trace
 
 @dataclass
 class UserModel(db.Model):
@@ -80,3 +80,27 @@ class UserModel(db.Model):
         kwargs['name'] = kwargs['name'].title()
 
         return kwargs
+
+    @staticmethod
+    def validate_update(**kwargs):
+       
+        if 'username' in kwargs:
+            found_user_username: UserModel = UserModel.query.filter_by(username=kwargs['username']).first()
+            if found_user_username:
+                raise UsernameAlreadyExists('this username already exists!')
+            
+        if 'email' in kwargs:
+            found_user_email: UserModel = UserModel.query.filter_by(email=kwargs['email']).first()
+            if found_user_email:
+                raise EmailAlreadyExists('this email already exists!')
+
+        return kwargs
+
+    @staticmethod
+    def validate_user(current_id, user_id):
+        user = UserModel.query.get(user_id)
+
+        if not user.id == current_id:
+            raise UserOwnerError('you cannot update or delete a different user!')
+        
+        return current_id, user_id

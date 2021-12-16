@@ -1,8 +1,8 @@
 from datetime import datetime, timezone
 from flask import request, jsonify
-from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, NotFoundDataError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
-from flask_jwt_extended import create_access_token, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.controllers import create, delete, get_all, update
 import sqlalchemy
 from email.mime.multipart import MIMEMultipart
@@ -10,30 +10,30 @@ from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
 
-# def send_email(**kwargs):
-#     email = MIMEMultipart()
-#     password = environ.get('SMTP_PASS')
+def send_email(**kwargs):
+    email = MIMEMultipart()
+    password = environ.get('SMTP_PASS')
     
-#     email['From'] = environ.get('STMP_MAIL')
-#     email['To'] = kwargs['email']
-#     email['Subject'] = 'Boas vindas'
+    email['From'] = environ.get('STMP_MAIL')
+    email['To'] = kwargs['email']
+    email['Subject'] = 'Boas vindas'
 
 
-#     message = 'Bem vindo(a) ao PathFinder, {}! Click here to validade your acount - https://pathfinder-q3.vercel.app/confirmation/{}'.format(kwargs['username'], kwargs['email'])
+    message = 'Bem vindo(a) ao PathFinder, {}! Click here to validade your acount - https://pathfinder-q3.vercel.app/confirmation/{}'.format(kwargs['username'], kwargs['email'])
     
-#     email.attach(MIMEText(message, 'plain'))
-#     context = ssl.create_default_context()
+    email.attach(MIMEText(message, 'plain'))
+    context = ssl.create_default_context()
   
-#     with smtplib.SMTP_SSL('smtp.gmail.com', port=465, context=context) as server:
-#         server.login(email['From'], password)
-#         server.sendmail(email['From'], email['To'], email.as_string())
+    with smtplib.SMTP_SSL('smtp.gmail.com', port=465, context=context) as server:
+        server.login(email['From'], password)
+        server.sendmail(email['From'], email['To'], email.as_string())
 
 
 def create_user():
     try:
         data = request.get_json()
 
-        # send_email(**data)
+        send_email(**data)
         UserModel.validate(**data)
 
         password_to_hash = data.pop('password')
@@ -88,11 +88,11 @@ def login():
     if not found_user:
         return {'error': 'User not found'}, 404
 
-    # if activate:
-    #     found_user.confirm_email = True
+    if activate:
+        found_user.confirm_email = True
 
-    # if found_user.confirm_email == False:
-    #     return {'error': 'Please activate your account'}, 409
+    if found_user.confirm_email == False:
+        return {'error': 'Please activate your account'}, 409
     
 
     if found_user.verify_password(data['password']):
@@ -125,10 +125,16 @@ def get_by_id(id):
 def update_user(id):
     try:
         data = request.get_json()
-        
+        current_user = get_jwt_identity()
+        admin_id = current_user['id']
+
+        UserModel.validate_user(admin_id, id)
+        UserModel.validate_update(**data)
+
         data['updated_at'] = datetime.now(timezone.utc)
 
         user = update(UserModel, data, id)
+        return user
 
     except NotFoundDataError as err:
         return jsonify({'error': str(err)}), 404
@@ -136,14 +142,29 @@ def update_user(id):
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
-    return user
+    except UsernameAlreadyExists as err:
+        return jsonify({'error': str(err)}), 409
+
+    except EmailAlreadyExists as err:
+        return jsonify({'error': str(err)}), 409
+
+    except UserOwnerError as err:
+        return jsonify({'error': str(err)}), 400
 
 @jwt_required()
 def delete_user(id):
     try:
+        current_user = get_jwt_identity()
+        admin_id = current_user['id']
+
+        UserModel.validate_user(admin_id, id)
         user = delete(UserModel, id)
-    
+        return user
+
     except sqlalchemy.orm.exc.UnmappedInstanceError:
         return {'error': 'User not found.'}, 404
+    
+    except UserOwnerError as err:
+        return jsonify({'error': str(err)}), 400
 
-    return user
+    

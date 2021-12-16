@@ -43,3 +43,6 @@ class UsernameAlreadyExists(Exception):
 
 class InvalidPasswordLength(Exception):
     ...
+
+class UserOwnerError(Exception):
+    ...
