@@ -30,7 +30,7 @@ class SubscriberModel(db.Model):
 
     @staticmethod
     def validate(**kwargs):
-      valid_keys = ['user_id', 'path_id']
+      valid_keys = ['path_id', 'user_id']
       received_keys = [keys for keys in kwargs.keys()]
     
       if not received_keys == valid_keys:

@@ -10,6 +10,7 @@ from app.exceptions.base_exceptions import NotFoundDataError, WrongKeysError, Pa
 def create_subscriber():
     try:
         data = request.get_json()
+        
         current_user = get_jwt_identity()
 
         data['user_id'] = current_user['id']
