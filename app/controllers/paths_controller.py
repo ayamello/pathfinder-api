@@ -183,3 +183,13 @@ def get_paths_by_user_id(id: int):
         return jsonify({'error': 'There are no paths in this user ID'}), 404
         
     return jsonify(paths_by_user), 200
+
+
+@jwt_required()
+def get_path_by_id(id: int):
+    paths_by_id = PathModel.query.filter_by(id=id).first()
+
+    if not paths_by_id:
+        return jsonify({'error': 'There are no paths with this ID'}), 404
+        
+    return jsonify(paths_by_id), 200

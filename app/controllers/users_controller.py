@@ -1,5 +1,5 @@
 from datetime import datetime, timezone
-from flask import request, jsonify
+from flask import request, jsonify, current_app
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
+
 
 def send_email(**kwargs):
     email = MIMEMultipart()
@@ -79,11 +80,13 @@ def login():
     data = request.get_json()
 
     found_user: UserModel = UserModel.query.filter_by(email=data['email']).first()
+    
     if not found_user:
         return {'error': 'User not found'}, 404
 
     if activate:
         found_user.confirm_email = True
+        current_app.db.session.commit()
 
     if found_user.confirm_email == False:
         return {'error': 'Please activate your account'}, 409
@@ -91,6 +94,7 @@ def login():
 
     if found_user.verify_password(data['password']):
         access_token = create_access_token(identity=found_user)
+        
         return {
             'token': access_token
             }, 200
