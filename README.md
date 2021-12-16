@@ -9,7 +9,7 @@
 <h2>Overview</h2>
 
 <p>
-    The API flow is composed of the Path which is the journey. Inside the Path are the Points, which are the places that will be visited during the trip. And in Points, there are Activities, which are the actions of the traveler at each point. In addition, there are also Subscribers, which is the list of subscribers on a given Path. That is, a traveler user creates a Path and other users can subscribe to it. And yet, within Path, there are reviews, which are the ratings that users can give to a Point.
+    The API flow is composed of the Path which is the journey. Inside the Path are the Points, which are the places that will be visited during the trip. And in Points, there are Activities, which are the actions of the traveler at each point. In addition, there are also Subscribers, which is the list of subscribers on a given Path. That is, a traveler user creates a Path and other users can subscribe to it. And yet, within Path, there are reviews, which are the ratings that users can give to a Activity.
 </p>
 
 <blockquote> 🔗 Base URL: https://pathfinder-q3.herokuapp.com/</blockquote>
@@ -29,7 +29,8 @@
     "username": "kenzot",
     "birthdate": "04/12/1999",
     "email": "kenzotraveler@gmail.com",
-    "password": "123456"
+    "password": "12345678",
+    "password_confirmaion": "12345678"
 }
 ```
 
@@ -99,7 +100,7 @@ or
 ```json
 {
     "email": "kenzotraveler@mail.com",
-    "password": "123456"
+    "password": "12345678"
 }
 ```
 
@@ -652,7 +653,6 @@ No body
 `POST /paths/points/activities/reviews - Request format`
 ```json
 {
-	"name": "5 stars",
 	"review": "The beach is amazing, it was the best day",
 	"activity_id": 1
 }

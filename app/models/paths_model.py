@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from app.models.points_paths_table import points_paths
 from datetime import datetime, timezone
+
+
 @dataclass
 class PathModel(db.Model):
 	id: int
