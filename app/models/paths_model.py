@@ -26,8 +26,8 @@ class PathModel(db.Model):
 	initial_date = db.Column(db.DateTime(timezone=True))
 	end_date = db.Column(db.DateTime(timezone=True))
 	duration = db.Column(db.String(255))
-	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
-	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+	created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+	updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 	admin_id = db.Column(
 		db.Integer,
 		db.ForeignKey('users.id'),
