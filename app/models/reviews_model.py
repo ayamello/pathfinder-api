@@ -34,8 +34,8 @@ class ReviewModel(db.Model):
         
         if not valid_keys == received_keys:
             raise WrongKeysError(valid_keys, received_keys)
-
-        if not type(kwargs['name']) == str:
+        
+        if not type(kwargs['username']) == str:
             raise NotStringError('name must be string!')
         
         current_activity = ActivityModel.query.get(kwargs['activity_id'])
