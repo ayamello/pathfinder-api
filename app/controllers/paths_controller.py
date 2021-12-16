@@ -2,9 +2,8 @@ from datetime import datetime, timezone
 from flask import request, jsonify
 from app.controllers import create, delete, get_all, update
 from app.models.paths_model import PathModel
-import sqlalchemy
 from sqlalchemy.orm.exc import UnmappedInstanceError
-from sqlalchemy.exc import InvalidRequestError
+from sqlalchemy.exc import InvalidRequestError, DataError
 from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -12,42 +11,42 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 def create_path():
     try:
         data = request.get_json()
+
         current_user = get_jwt_identity()
+
         data['admin_id'] = current_user['id']
 
         validated_data = PathModel.validate(**data)
         
         path = create(validated_data, PathModel, '')
 
-        initial_date = ""
-        end_date = ""
+        initial_date = ''
+        end_date = ''
 
         if not path.initial_date == None and not path.end_date == None: 
             diff = path.end_date - path.initial_date
 
             if diff.days < 0:
                 raise DateError('The final date must be after initial date!')
-            elif diff.days == 0:
-                raise DateError('The dates must not be in the same day!')
-
+        
             initial_date = path.initial_date.strftime("%d/%m/%Y")
             end_date = path.end_date.strftime("%d/%m/%Y")
 
         output = {
-            "id": path.id,
-            "name": path.name,
-            "description": path.description,
-            "initial_date": initial_date,
-            "end_date": end_date,
-            "duration": path.duration,
-            "created_at": path.created_at,
-            "updated_at": path.updated_at,
-            "admin_user": {
-                "name": path.user.name,
-                "email": path.user.email
+            'id': path.id,
+            'name': path.name,
+            'description': path.description,
+            'initial_date': initial_date,
+            'end_date': end_date,
+            'duration': path.duration,
+            'created_at': path.created_at,
+            'updated_at': path.updated_at,
+            'admin_user': {
+                'name': path.user.name,
+                'email': path.user.email
             },
-            "points": path.points,
-            "subscribers": path.subscribers
+            'points': path.points,
+            'subscribers': path.subscribers
         }
 
         return jsonify(output), 201
@@ -55,33 +54,28 @@ def create_path():
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
-    except NotStringError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except NotIntegerError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except EmptyStringError as err:
+    except (NotStringError, EmptyStringError, DateError) as err:
         return jsonify({'error': str(err)}), 400
 
     except MissingKeyError as err:
         return jsonify({'error': err.message}), 400
-
-    except DateError as err:
-        return jsonify({'error': str(err)}), 400
     
-    except sqlalchemy.exc.DataError:
+    except DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
 
 
 @jwt_required()
 def delete_path(id: int):
-    current_user = get_jwt_identity()
-    admin_id = current_user['id']
-
     try:
+        current_user = get_jwt_identity()
+
+        admin_id = current_user['id']
+
         PathModel.validate_owner(admin_id, id)
+
         path = delete(PathModel, id)
+
+        return path
 
     except UnmappedInstanceError:
         return {'error': 'Path ID Not Found'}, 404
@@ -91,39 +85,35 @@ def delete_path(id: int):
 
     except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
-
-    return path
+   
 
 @jwt_required()
 def update_path(id: int):
-    data = request.get_json()
-    current_user = get_jwt_identity()
-    admin_id = current_user['id']
-    
     try:
         data = request.get_json()
+
+        current_user = get_jwt_identity()
+
+        admin_id = current_user['id']
+
         data['updated_at'] = datetime.now(timezone.utc)
+
         PathModel.validate_owner(admin_id, id)
+
         PathModel.validate_update(**data)
 
         path = update(PathModel, data, id)
 
         return path
 
-    except NotFoundDataError as err:
-        return jsonify({'error': str(err)}), 404
+    except (InvalidRequestError, EmptyStringError, PathOwnerError ) as err:
+        return jsonify({'error': str(err)}), 400
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
-    except InvalidRequestError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except EmptyStringError as err:
-        return jsonify({'error': str(err)}), 400
-    
-    except PathOwnerError as err:
-        return jsonify({'error': str(err)}), 400
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
 
 
 @jwt_required()
@@ -187,19 +177,28 @@ def get_all_by_page(pg: int):
 
 @jwt_required()
 def get_paths_by_user_id(user_id: int):
-    paths_by_user = PathModel.query.filter_by(admin_id=user_id).all()
+    try:
+        paths_by_user = PathModel.query.filter_by(admin_id=user_id).all()
 
-    if not paths_by_user:
-        return jsonify({'error': 'There are no paths in this user ID'}), 404
-        
-    return jsonify(paths_by_user), 200
+        if not paths_by_user:
+            raise NotFoundDataError('User ID not found!')
+            
+        return jsonify(paths_by_user), 200
+
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404
+
 
 
 @jwt_required()
 def get_path_by_id(id: int):
-    paths_by_id = PathModel.query.filter_by(id=id).first()
+    try:
+        paths_by_id = PathModel.query.filter_by(id=id).first()
 
-    if not paths_by_id:
-        return jsonify({'error': 'There are no paths with this ID'}), 404
-        
-    return jsonify(paths_by_id), 200
+        if not paths_by_id:
+            raise NotFoundDataError('Path ID not found!')
+            
+        return jsonify(paths_by_id), 200
+
+    except NotFoundDataError as err:
+        return jsonify({'error': str(err)}), 404

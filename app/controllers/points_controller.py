@@ -1,20 +1,22 @@
 from flask import request, current_app, jsonify
 from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required, get_jwt_identity
-import sqlalchemy
 from app.controllers import create, delete, update
 from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
-
+from sqlalchemy.exc import DataError
 
 @jwt_required()
 def create_point():
     try:
         data = request.get_json()
+
         path_id = data.pop('path_id')
+
         current_user = get_jwt_identity()
+
         admin_id = current_user['id']
 
         PathModel.validate_owner(admin_id, path_id)
@@ -30,6 +32,7 @@ def create_point():
         }
         
         keys_data = list(data.keys())
+
         data_address_keys = ['street', 'number', 'city', 'state', 'country', 'postal_code', 'coordenadas']
         
         for key in keys_data:
@@ -37,15 +40,19 @@ def create_point():
                 data.pop(key)
             
         AddressModel.validate(**data_address)
+
         address = create(data_address, AddressModel, '')
+
         AddressModel.query.filter(AddressModel.street==address.street, AddressModel.number==address.number).first()
             
         data['address_id'] = address.id
             
         PointModel.validate(**data)
+
         point = create(data, PointModel, '')
 
         path = PathModel.query.get(path_id)
+
         path.points.append(point)
             
         current_app.db.session.commit()
@@ -60,23 +67,14 @@ def create_point():
     except KeyError as err:
         return {'error': {'Verify key':str(err)}}, 400
 
-    except NotStringError as err:
+    except (NotStringError, NotIntegerError, EmptyStringError, PathOwnerError) as err:
         return jsonify({'error': str(err)}), 400
 
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
-    except NotIntegerError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except sqlalchemy.exc.DataError:
+    except DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
-    
-    except EmptyStringError as err:
-        return jsonify({'error': str(err)}), 400
-    
-    except PathOwnerError as err:
-        return jsonify({'error': str(err)}), 400
 
 
 @jwt_required()
@@ -94,12 +92,17 @@ def points_by_path(path_id: int):
 def update_point(id: int):
     try:
         data = request.get_json()
+
         current_user = get_jwt_identity()
+
         admin_id = current_user['id']
+
         data['updated_at'] = datetime.now(timezone.utc)
        
         PointModel.validate_user(admin_id, id)
+
         PointModel.validate_update(**data)
+
         point = update(PointModel, data, id)
 
         return point
@@ -110,17 +113,11 @@ def update_point(id: int):
     except NotFoundDataError:
         return {'error': 'Point ID Not Found'}, 404
 
-    except NotStringError as err:
+    except (NotStringError, NotIntegerError, PathOwnerError) as err:
         return jsonify({'error': str(err)}), 400
 
-    except NotIntegerError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except sqlalchemy.exc.DataError:
+    except DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
-    
-    except PathOwnerError as err:
-        return jsonify({'error': str(err)}), 400
 
 
 @jwt_required()
