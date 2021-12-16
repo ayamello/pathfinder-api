@@ -1,8 +1,9 @@
 from app.configs.database import db
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from sqlalchemy.orm import validates
 from datetime import datetime, timezone
+from app.models.users_model import UserModel
 
 @dataclass
 class PointModel(db.Model):
@@ -73,3 +74,15 @@ class PointModel(db.Model):
 			raise EmptyStringError(f'{key} must not be an empty string!')
 
 		return value
+	
+	@staticmethod
+	def validate_user(user_id, point_id):
+		current_user = UserModel.query.get(user_id)
+		user_paths = [path for path in current_user.paths_list]
+		
+		for path in user_paths:
+			for point in path.points:
+				if point.id == point_id:
+					return user_id, point_id
+				
+		raise PathOwnerError('you need to be the path owner to update or delete a point!')

@@ -7,7 +7,6 @@ from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
-from ipdb import set_trace
 
 
 @jwt_required()
@@ -95,8 +94,11 @@ def points_by_path(path_id: int):
 def update_point(id: int):
     try:
         data = request.get_json()
+        current_user = get_jwt_identity()
+        admin_id = current_user['id']
         data['updated_at'] = datetime.now(timezone.utc)
-
+       
+        PointModel.validate_user(admin_id, id)
         PointModel.validate_update(**data)
         point = update(PointModel, data, id)
 
@@ -116,14 +118,26 @@ def update_point(id: int):
 
     except sqlalchemy.exc.DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
+    
+    except PathOwnerError as err:
+        return jsonify({'error': str(err)}), 400
 
 
 @jwt_required()
 def delete_point(id: int):
     try:
+        current_user = get_jwt_identity()
+        admin_id = current_user['id']
+        PointModel.validate_user(admin_id, id)
+
         point = delete(PointModel, id)
+
+        return point
 
     except NotFoundDataError:
         return {'error': 'Point ID Not Found'}, 404
 
-    return point
+    except PathOwnerError as err:
+        return jsonify({'error': str(err)}), 400
+
+    
