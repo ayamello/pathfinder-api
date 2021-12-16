@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from flask import request, jsonify
+from flask_jwt_extended.utils import get_jwt_identity
 from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
@@ -134,6 +135,12 @@ def update_user(id):
 
 @jwt_required()
 def delete_user(id):
+    current_user = get_jwt_identity()
+    admin_id = current_user['id']
+    
+    if admin_id != id:
+        return {"error": "Unauthorized action"}
+
     try:
         user = delete(UserModel, id)
     
