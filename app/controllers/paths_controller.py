@@ -7,8 +7,6 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError
 from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from ipdb import set_trace
-
 
 @jwt_required()
 def create_path():
@@ -188,10 +186,20 @@ def get_all_by_page(pg: int):
 
 
 @jwt_required()
-def get_paths_by_user_id(id: int):
-    paths_by_user = PathModel.query.filter_by(admin_id=id).all()
+def get_paths_by_user_id(user_id: int):
+    paths_by_user = PathModel.query.filter_by(admin_id=user_id).all()
 
     if not paths_by_user:
         return jsonify({'error': 'There are no paths in this user ID'}), 404
         
     return jsonify(paths_by_user), 200
+
+
+@jwt_required()
+def get_path_by_id(id: int):
+    paths_by_id = PathModel.query.filter_by(id=id).first()
+
+    if not paths_by_id:
+        return jsonify({'error': 'There are no paths with this ID'}), 404
+        
+    return jsonify(paths_by_id), 200

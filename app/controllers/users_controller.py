@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
-from flask import request, jsonify
-from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, NotFoundDataError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, NotFoundDataError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
+from flask import request, jsonify, current_app
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.controllers import create, delete, get_all, update
@@ -9,6 +9,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
+
 
 def send_email(**kwargs):
     email = MIMEMultipart()
@@ -34,12 +35,12 @@ def create_user():
         data = request.get_json()
 
         send_email(**data)
-        UserModel.validate(**data)
 
-        password_to_hash = data.pop('password')
-
-        new_user = create(data, UserModel, password_to_hash)
-
+        validated_data = UserModel.validate(**data)
+        
+        password_to_hash = validated_data.pop('password')
+        new_user = create(validated_data, UserModel, password_to_hash)
+        
     except WrongKeysError as err:
         return jsonify({'error': err.message}), 400
 
@@ -64,6 +65,9 @@ def create_user():
     except sqlalchemy.exc.DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
 
+    except PasswordConfirmationDontMatch as err:
+        return jsonify({'error': str(err)}), 400
+
     output = {
         "id": new_user.id,
         "name": new_user.name,
@@ -85,11 +89,13 @@ def login():
     data = request.get_json()
 
     found_user: UserModel = UserModel.query.filter_by(email=data['email']).first()
+    
     if not found_user:
         return {'error': 'User not found'}, 404
 
     if activate:
         found_user.confirm_email = True
+        current_app.db.session.commit()
 
     if found_user.confirm_email == False:
         return {'error': 'Please activate your account'}, 409
@@ -97,6 +103,7 @@ def login():
 
     if found_user.verify_password(data['password']):
         access_token = create_access_token(identity=found_user)
+        
         return {
             'token': access_token
             }, 200
@@ -153,6 +160,12 @@ def update_user(id):
 
 @jwt_required()
 def delete_user(id):
+    current_user = get_jwt_identity()
+    admin_id = current_user['id']
+    
+    if admin_id != id:
+        return {"error": "Unauthorized action"}
+
     try:
         current_user = get_jwt_identity()
         admin_id = current_user['id']

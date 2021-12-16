@@ -2,9 +2,8 @@ from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
 from datetime import datetime, timezone
-from ipdb import set_trace
 
 @dataclass
 class UserModel(db.Model):
@@ -12,6 +11,7 @@ class UserModel(db.Model):
     name: str
     username: str
     email: str
+    confirm_email: str
     birthdate: str
     url_image: str
     created_at: str
@@ -47,8 +47,8 @@ class UserModel(db.Model):
     
     @staticmethod
     def validate(**kwargs):
-        valid_keys = ['name', 'username', 'email', 'birthdate', 'url_image', 'password']
-        required_keys = ['name', 'username', 'email', 'birthdate', 'password']
+        valid_keys = ['name', 'username', 'email', 'birthdate', 'url_image', 'password', 'password_confirmation']
+        required_keys = ['name', 'username', 'email', 'birthdate', 'password', 'password_confirmation']
         received_keys = [key for key in kwargs.keys()]
 
         for key in received_keys:
@@ -64,7 +64,11 @@ class UserModel(db.Model):
 
             if kwargs[key] == '':
                 raise EmptyStringError(f'{key} must not be an empty string!')
-
+        
+        password_confirmation = kwargs.pop('password_confirmation')
+        if not kwargs['password'] == password_confirmation:
+            raise PasswordConfirmationDontMatch('Password and Password Confirmation must be equal.')
+        
         found_user_email: UserModel = UserModel.query.filter_by(email=kwargs['email']).first()
         found_user_username: UserModel = UserModel.query.filter_by(username=kwargs['username']).first()
         

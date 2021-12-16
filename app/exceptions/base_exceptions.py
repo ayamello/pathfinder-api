@@ -46,3 +46,6 @@ class InvalidPasswordLength(Exception):
 
 class UserOwnerError(Exception):
     ...
+    
+class PasswordConfirmationDontMatch(Exception):
+    ...
