@@ -2,11 +2,13 @@ from datetime import datetime, timezone
 from flask import request, jsonify
 from app.controllers import create, delete, get_all, update
 from app.models.paths_model import PathModel
+import sqlalchemy
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError
 from app.exceptions.base_exceptions import DateError, EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from ipdb import set_trace
+
 
 @jwt_required()
 def create_path():
@@ -69,6 +71,9 @@ def create_path():
 
     except DateError as err:
         return jsonify({'error': str(err)}), 400
+    
+    except sqlalchemy.exc.DataError:
+        return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
 
 
 @jwt_required()

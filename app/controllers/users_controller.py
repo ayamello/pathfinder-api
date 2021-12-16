@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from flask import request, jsonify
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, NotFoundDataError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required
 from app.controllers import create, delete, get_all, update
@@ -57,6 +57,12 @@ def create_user():
 
     except MissingKeyError as err:
         return jsonify({'error': err.message}), 400
+    
+    except InvalidPasswordLength as err:
+        return jsonify({'error': str(err)}), 400
+    
+    except sqlalchemy.exc.DataError:
+        return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
 
     output = {
         "id": new_user.id,

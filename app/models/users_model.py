@@ -2,7 +2,7 @@ from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotStringError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists
 from datetime import datetime, timezone
 
 
@@ -69,10 +69,13 @@ class UserModel(db.Model):
         found_user_username: UserModel = UserModel.query.filter_by(username=kwargs['username']).first()
         
         if found_user_username:
-            raise UsernameAlreadyExists('This username already exists.')
+            raise UsernameAlreadyExists('this username already exists!')
 
         if found_user_email:
-            raise EmailAlreadyExists('This email already exists.')
+            raise EmailAlreadyExists('this email already exists!')
+
+        if len(kwargs['password']) < 8:
+            raise InvalidPasswordLength('your password must have at least 8 characters!')
 
         kwargs['name'] = kwargs['name'].title()
 

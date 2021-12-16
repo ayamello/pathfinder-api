@@ -40,3 +40,6 @@ class EmailAlreadyExists(Exception):
 
 class UsernameAlreadyExists(Exception):
     ...
+
+class InvalidPasswordLength(Exception):
+    ...
