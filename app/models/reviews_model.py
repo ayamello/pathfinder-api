@@ -11,7 +11,6 @@ class ReviewModel(db.Model):
     review: str
     created_at: str
     updated_at: str
-    activity_id: int
    
     __tablename__ = 'reviews'
 
