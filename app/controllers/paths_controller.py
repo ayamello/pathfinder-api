@@ -20,9 +20,6 @@ def create_path():
         
         path = create(validated_data, PathModel, '')
 
-        initial_date = ''
-        end_date = ''
-
         if not path.initial_date == None and not path.end_date == None: 
             diff = path.end_date - path.initial_date
 

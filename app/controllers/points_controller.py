@@ -6,7 +6,11 @@ from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
 from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
+<<<<<<< HEAD
+from pdb import set_trace
+=======
 from sqlalchemy.exc import DataError
+>>>>>>> 689935cee25a31ce68ee4bba677afcd43fc6ad64
 
 @jwt_required()
 def create_point():
@@ -21,34 +25,52 @@ def create_point():
 
         PathModel.validate_owner(admin_id, path_id)
 
-        data_address = {
-            'street': data['street'],
-            'number': data['number'],
-            'city': data['city'].title(),
-            'state': data['state'].title(),
-            'country': data['country'].title(),
-            'postal_code': data['postal_code'],
-            'coordenadas': data['coordenadas']
-        }
-        
         keys_data = list(data.keys())
 
         data_address_keys = ['street', 'number', 'city', 'state', 'country', 'postal_code', 'coordenadas']
-        
+       
+        initial_data_address = []
+
         for key in keys_data:
             if key in data_address_keys:
+                initial_data_address.append({key: data[key]})
                 data.pop(key)
+
+        for i in range(len(initial_data_address)):
+            item = initial_data_address[i]
+            key = keys_data[i]
+            if isinstance(item[key], str):
+                item[key] = item[key].title()
+            else:
+                item[key] = item[key]    
+
+        data_address = {}
+
+        for i in range(len(initial_data_address)):
+            item = initial_data_address[i]
+            key = keys_data[i]
             
+<<<<<<< HEAD
+            data_address[key] = item[key]
+
+        # AddressModel.validate(**data_address)
+=======
         AddressModel.validate(**data_address)
 
+>>>>>>> 689935cee25a31ce68ee4bba677afcd43fc6ad64
         address = create(data_address, AddressModel, '')
 
         AddressModel.query.filter(AddressModel.street==address.street, AddressModel.number==address.number).first()
             
         data['address_id'] = address.id
             
+<<<<<<< HEAD
+        # PointModel.validate(**data)
+        data['path_id'] = path_id
+=======
         PointModel.validate(**data)
 
+>>>>>>> 689935cee25a31ce68ee4bba677afcd43fc6ad64
         point = create(data, PointModel, '')
 
         path = PathModel.query.get(path_id)
@@ -64,17 +86,36 @@ def create_point():
         
         return jsonify(point), 201
 
-    except KeyError as err:
-        return {'error': {'Verify key':str(err)}}, 400
+    # except KeyError as err:
+    #     return {'error': {'Verify key':str(err)}}, 400
 
+<<<<<<< HEAD
+    # except NotStringError as err:
+    #     return jsonify({'error': str(err)}), 400
+=======
     except (NotStringError, NotIntegerError, EmptyStringError, PathOwnerError) as err:
         return jsonify({'error': str(err)}), 400
+>>>>>>> 689935cee25a31ce68ee4bba677afcd43fc6ad64
 
-    except WrongKeysError as err:
-        return jsonify({'error': err.message}), 400
+    # except WrongKeysError as err:
+    #     return jsonify({'error': err.message}), 400
 
+<<<<<<< HEAD
+    # except NotIntegerError as err:
+    #     return jsonify({'error': str(err)}), 400
+
+    # except sqlalchemy.exc.DataError:
+    #     return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
+    
+    # except EmptyStringError as err:
+    #     return jsonify({'error': str(err)}), 400
+    
+    except PathOwnerError as err:
+        return jsonify({'error': str(err)}), 400
+=======
     except DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
+>>>>>>> 689935cee25a31ce68ee4bba677afcd43fc6ad64
 
 
 @jwt_required()
@@ -136,5 +177,3 @@ def delete_point(id: int):
 
     except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
-
-    
