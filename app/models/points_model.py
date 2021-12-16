@@ -24,8 +24,8 @@ class PointModel(db.Model):
 	initial_date = db.Column(db.Date)
 	end_date = db.Column(db.Date)
 	duration = db.Column(db.String(255))
-	created_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
-	updated_at = db.Column(db.DateTime(timezone=True), default=datetime.now(timezone.utc))
+	created_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
+	updated_at = db.Column(db.DateTime, default=datetime.now(timezone.utc))
 	address_id = db.Column(
 	  db.Integer,
 	  db.ForeignKey('addresses.id'),

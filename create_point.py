@@ -1,15 +1,3 @@
-from flask import request, current_app, jsonify
-from datetime import datetime, timezone
-from flask_jwt_extended import jwt_required
-import sqlalchemy
-from app.controllers import create, delete, update
-from app.models.paths_model import PathModel
-from app.models.points_model import PointModel
-from app.models.addresses_model import AddressModel
-from app.exceptions.base_exceptions import NotIntegerError, NotStringError, WrongKeysError, NotFoundDataError
-
-
-@jwt_required()
 def create_point():
     try:
         data = request.get_json()
@@ -65,52 +53,3 @@ def create_point():
 
     except sqlalchemy.exc.DataError:
         return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
-
-
-@jwt_required()
-def points_by_path(path_id: int):
-    try:
-        path = PathModel.query.get(path_id)
-
-        return {'points': path.points}, 200
-
-    except AttributeError:
-        return {'error': 'Point ID Not Found'}, 404
-
-
-@jwt_required()
-def update_point(id: int):
-    try:
-        data = request.get_json()
-        data['updated_at'] = datetime.now(timezone.utc)
-
-        PointModel.validate_update(**data)
-        point = update(PointModel, data, id)
-
-        return point
-
-    except WrongKeysError as err:
-        return jsonify({'error': err.message}), 400
-
-    except NotFoundDataError:
-        return {'error': 'Point ID Not Found'}, 404
-
-    except NotStringError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except NotIntegerError as err:
-        return jsonify({'error': str(err)}), 400
-
-    except sqlalchemy.exc.DataError:
-        return jsonify({'error': 'Invalid date format! It must be dd/mm/yyyy.'}), 400
-
-
-@jwt_required()
-def delete_point(id: int):
-    try:
-        point = delete(PointModel, id)
-
-    except NotFoundDataError:
-        return {'error': 'Point ID Not Found'}, 404
-
-    return point
