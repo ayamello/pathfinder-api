@@ -1,6 +1,6 @@
 from flask import Blueprint
 from app.controllers.subscribers_controller import create_subscriber
 
-bp = Blueprint('bp_subscribers', __name__, url_prefix='/subscribers')
+bp = Blueprint('bp_subscribers', __name__,)
 
-bp.post('')(create_subscriber)
+bp.post('/subscribers')(create_subscriber)

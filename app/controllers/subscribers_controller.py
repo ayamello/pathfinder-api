@@ -16,10 +16,10 @@ def create_subscriber():
         data['user_id'] = current_user['id']
         
         validated_data = SubscriberModel.validate(**data)
+        
 
         new_sub = create(validated_data, SubscriberModel, "")
-
-        return jsonify(new_sub), 201
+        return jsonify({'teste': new_sub}), 201
 
     except PathOwnerError as err:
         return jsonify({'error': str(err)}), 400
