@@ -2,7 +2,7 @@ from sqlalchemy.orm import backref
 from app.configs.database import db
 from dataclasses import dataclass
 from werkzeug.security import generate_password_hash, check_password_hash
-from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotStringError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
+from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLength, MissingKeyError, NotFoundDataError, NotStringError, UserOwnerError, WrongKeysError, EmailAlreadyExists, UsernameAlreadyExists, PasswordConfirmationDontMatch
 from datetime import datetime, timezone
 
 @dataclass
@@ -87,12 +87,12 @@ class UserModel(db.Model):
     @staticmethod
     def validate_update(**kwargs):
        
-        if 'username' in kwargs:
+        if 'username' in kwargs.keys():
             found_user_username: UserModel = UserModel.query.filter_by(username=kwargs['username']).first()
             if found_user_username:
                 raise UsernameAlreadyExists('this username already exists!')
             
-        if 'email' in kwargs:
+        if 'email' in kwargs.keys():
             found_user_email: UserModel = UserModel.query.filter_by(email=kwargs['email']).first()
             if found_user_email:
                 raise EmailAlreadyExists('this email already exists!')
@@ -102,6 +102,9 @@ class UserModel(db.Model):
     @staticmethod
     def validate_user(current_id, user_id):
         user = UserModel.query.get(user_id)
+
+        if not user:
+            raise NotFoundDataError('User ID not Found')
 
         if not user.id == current_id:
             raise UserOwnerError('you cannot update or delete a different user!')
