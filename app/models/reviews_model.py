@@ -28,12 +28,12 @@ class ReviewModel(db.Model):
 
     @staticmethod
     def validate(**kwargs):
-        valid_keys = ['review', 'activity_id', 'username']
+        required_keys = ['review', 'activity_id', 'username']
         received_keys = [key for key in kwargs.keys()]
 
-        
-        if not valid_keys == received_keys:
-            raise WrongKeysError(valid_keys, received_keys)
+        for key in received_keys:
+            if not key in required_keys:
+                raise WrongKeysError(required_keys, received_keys)
         
         if not type(kwargs['username']) == str:
             raise NotStringError('name must be string!')

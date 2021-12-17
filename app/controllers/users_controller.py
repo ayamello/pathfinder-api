@@ -36,7 +36,7 @@ def create_user():
     try:
         data = request.get_json()
 
-        # send_email(**data)
+        send_email(**data)
 
         validated_data = UserModel.validate(**data)
         

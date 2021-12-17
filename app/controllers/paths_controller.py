@@ -42,7 +42,7 @@ def create_path():
                 'name': path.user.name,
                 'email': path.user.email
             },
-            'points': path.points,
+            'points': [],
             'subscribers': path.subscribers
         }
 
