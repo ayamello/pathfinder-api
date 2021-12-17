@@ -8,6 +8,7 @@ from app.models.addresses_model import AddressModel
 from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError, NotFoundDataError
 from sqlalchemy.exc import DataError
 
+
 @jwt_required()
 def create_point():
     try:
@@ -64,7 +65,7 @@ def create_point():
         PointModel.validate(**data)
         data['path_id'] = path_id
         point = create(data, PointModel, '')
-
+        
         path = PathModel.query.get(path_id)
 
         path.points.append(point)

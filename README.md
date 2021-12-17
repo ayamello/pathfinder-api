@@ -49,51 +49,6 @@
 }
 ```
 
-<h3 style="text-align:center;">Possible errors</h3>
-
-<p>
-    If username or email already exist:
-</p>
-
-`POST /users - Response format - STATUS 409`
-
-```json
-{
-  "error": "This username already exists."
-}
-```
-
-or
-
-```json
-{
-  "error": "This email already exists."
-}
-```
-
-<p>
-    if missing or there is an error in the field syntax:
-</p>
-
-<span style="font-size:12px;">In the example, the request was made without the 'birthdate' field</span>
-
-`POST /users - Response format - STATUS 400`
-
-```json
-{
-  "error": {
-    "required_keys": [
-      "name",
-      "username",
-      "email",
-      "birthdate",
-      "password"
-    ],
-    "missing_key": "birthdate"
-  }
-}
-```
-
 <h3 style="text-align:center;font-size:21px;">Login</h3>
 
 `POST /login - Request format`
@@ -727,3 +682,22 @@ No body
 ```
 No body
 ```
+
+<hr>
+
+<h5 style="text-align:center;"><strong>Terms of use</strong></h5>
+
+<p style="text-align:center;font-size:12px;">
+  API developed in an educational environment for teaching purposes.
+</p>
+
+<hr>
+
+<h3 style="text-align:center;"><strong>🧑‍💻 Developers 👩‍💻</strong></h3>
+<div style="text-align:center;">
+  <a href="https://www.linkedin.com/in/ayana-mello/">Ayana Mello</a></br>
+  <a href="https://www.linkedin.com/in/carloslima-hkz7/">Carlos Lima</a></br>
+  <a href="https://www.linkedin.com/in/gabriel-bueno-11227a209/">Gabriel Bueno</a></br>
+  <a href="https://www.linkedin.com/in/oliveiasmim/">Iasmim Oliveira</a></br>
+  <a href="https://www.linkedin.com/in/miguel-maurer/">Miguel Maurer</a>
+</div>
