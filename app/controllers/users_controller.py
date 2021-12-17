@@ -17,7 +17,7 @@ def send_email(**kwargs):
     
     password = environ.get('SMTP_PASS')
     
-    email['From'] = environ.get('STMP_MAIL')
+    email['From'] = environ.get('SMTP_MAIL')
     email['To'] = kwargs['email']
     email['Subject'] = 'Boas vindas'
 
