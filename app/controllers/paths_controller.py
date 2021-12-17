@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from flask import request, jsonify
-from app.controllers import create, delete, get_all, update
+from app.controllers import create, delete, get_all, update, convert_date
 from app.models.paths_model import PathModel
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import InvalidRequestError, DataError
@@ -15,6 +15,12 @@ def create_path():
         current_user = get_jwt_identity()
 
         data['admin_id'] = current_user['id']
+
+        if "initial_date" in data.keys():
+            data['initial_date'] = convert_date(data['initial_date'])
+            
+        if "end_date" in data.keys():
+            data['end_date'] = convert_date(data['end_date'])
 
         validated_data = PathModel.validate(**data)
         
@@ -96,6 +102,12 @@ def update_path(id: int):
         data['updated_at'] = datetime.now(timezone.utc)
 
         PathModel.validate_owner(admin_id, id)
+        
+        if "initial_date" in data.keys():
+            data['initial_date'] = convert_date(data['initial_date'])
+            
+        if "end_date" in data.keys():
+            data['end_date'] = convert_date(data['end_date'])
 
         PathModel.validate_update(**data)
 

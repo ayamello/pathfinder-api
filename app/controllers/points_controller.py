@@ -1,7 +1,7 @@
 from flask import request, current_app, jsonify
 from datetime import datetime, timezone
 from flask_jwt_extended import jwt_required, get_jwt_identity
-from app.controllers import create, delete, update
+from app.controllers import create, delete, update, convert_date
 from app.models.paths_model import PathModel
 from app.models.points_model import PointModel
 from app.models.addresses_model import AddressModel
@@ -22,6 +22,12 @@ def create_point():
         PathModel.validate_owner(admin_id, path_id)
 
         keys_data = list(data.keys())
+
+        if "initial_date" in data.keys():
+            data['initial_date'] = convert_date(data['initial_date'])
+
+        if "end_date" in data.keys():
+            data['end_date'] = convert_date(data['end_date'])
 
         data_address_keys = ['street', 'number', 'city', 'state', 'country', 'postal_code', 'coordenadas']
        
@@ -118,6 +124,12 @@ def update_point(id: int):
        
         PointModel.validate_user(admin_id, id)
 
+        if "initial_date" in data.keys():
+            data['initial_date'] = convert_date(data['initial_date'])
+            
+        if "end_date" in data.keys():
+            data['end_date'] = convert_date(data['end_date'])
+            
         PointModel.validate_update(**data)
 
         point = update(PointModel, data, id)
