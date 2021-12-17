@@ -10,7 +10,7 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
-from ipdb import set_trace
+
 
 def send_email(**kwargs):
     email = MIMEMultipart()
