@@ -3,14 +3,14 @@ from app.exceptions.base_exceptions import EmptyStringError, InvalidPasswordLeng
 from flask import request, jsonify, current_app
 from app.models.users_model import UserModel
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
-from app.controllers import create, delete, get_all, update
+from app.controllers import create, delete, get_all, update, convert_date
 from sqlalchemy.orm.exc import UnmappedInstanceError
 from sqlalchemy.exc import DataError
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib, ssl
 from os import environ
-
+from ipdb import set_trace
 
 def send_email(**kwargs):
     email = MIMEMultipart()
@@ -36,10 +36,11 @@ def create_user():
     try:
         data = request.get_json()
 
-        send_email(**data)
+        # send_email(**data)
 
         validated_data = UserModel.validate(**data)
-        
+        validated_data['birthdate'] = convert_date(validated_data['birthdate'])
+
         password_to_hash = validated_data.pop('password')
 
         new_user = create(validated_data, UserModel, password_to_hash)
@@ -85,8 +86,8 @@ def login():
         found_user.confirm_email = True
         current_app.db.session.commit()
 
-    if found_user.confirm_email == False:
-        return {'error': 'Please activate your account'}, 409
+    # if found_user.confirm_email == False:
+    #     return {'error': 'Please activate your account'}, 409
     
 
     if found_user.verify_password(data['password']):
@@ -127,9 +128,12 @@ def update_user(id):
         current_user = get_jwt_identity()
 
         admin_id = current_user['id']
-
+        
         UserModel.validate_user(admin_id, id)
 
+        if "birthdate" in data.keys():
+            data['birthdate'] = convert_date(data['birthdate'])
+            
         UserModel.validate_update(**data)
 
         data['updated_at'] = datetime.now(timezone.utc)

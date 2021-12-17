@@ -1,6 +1,6 @@
 from app.configs.database import db
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import EmptyStringError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, NotFoundDataError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from sqlalchemy.orm import validates
 from datetime import datetime, timezone
 from app.models.users_model import UserModel
@@ -88,6 +88,10 @@ class PointModel(db.Model):
 	@staticmethod
 	def validate_user(user_id, point_id):
 		current_user = UserModel.query.get(user_id)
+		
+		if not current_user:
+			raise NotFoundDataError('Point ID not found!')
+
 		user_paths = [path for path in current_user.paths_list]
 		
 		for path in user_paths:

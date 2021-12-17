@@ -1,6 +1,7 @@
 from flask import current_app, jsonify
 from app.exceptions.base_exceptions import NotFoundDataError, WrongKeysError
 from app.models.users_model import UserModel
+import datetime
 
 def create(data, model, password_hash):
     new_item = model(**data)
@@ -48,3 +49,7 @@ def delete(model, id):
     current_app.db.session.commit()
 
     return '', 204
+
+def convert_date(date):
+    converted_date = datetime.datetime.strptime(date,'%d/%m/%Y').strftime('%m/%d/%Y')
+    return converted_date

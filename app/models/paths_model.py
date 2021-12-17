@@ -1,7 +1,7 @@
 from app.configs.database import db
 from sqlalchemy.orm import validates
 from dataclasses import dataclass
-from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
+from app.exceptions.base_exceptions import EmptyStringError, MissingKeyError, NotFoundDataError, NotIntegerError, NotStringError, PathOwnerError, WrongKeysError
 from datetime import datetime, timezone
 
 
@@ -90,6 +90,9 @@ class PathModel(db.Model):
 	@staticmethod
 	def validate_owner(admin_id: int, path_id: int):
 		path = PathModel.query.get(path_id)
+
+		if not path:
+			raise NotFoundDataError('Path ID Not Found')
 		
 		if not path.admin_id == admin_id:
 			raise PathOwnerError('user cannot update or delete a path that does not belong to them.')
