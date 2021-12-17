@@ -29,8 +29,8 @@ class AddressModel(db.Model):
         required_keys = ['street', 'number', 'city', 'state', 'country', 'postal_code', 'coordenadas']
         received_keys = [key for key in kwargs.keys()]
 
-        for key in required_keys:
-            if key not in received_keys:
+        for key in received_keys:
+            if not key in required_keys:
                 raise WrongKeysError(required_keys, received_keys)
             
             if key == "number":

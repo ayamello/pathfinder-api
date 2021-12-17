@@ -42,16 +42,19 @@ class PointModel(db.Model):
 
 	@staticmethod
 	def validate(**kwargs):
-		required_keys = ['name', 'description', 'initial_date', 'end_date', 'duration', 'address_id']
+		required_keys = ['path_id', 'name', 'description', 'initial_date', 'end_date', 'duration', 'activities', 'address_id']
 		received_keys = [key for key in kwargs.keys()]
 
 		for key in received_keys:
-			if key not in required_keys:
+			if not key in required_keys:
 				raise WrongKeysError(required_keys, received_keys)
 		
 		for key in received_keys:
-			if key == "duration" or key == "address_id":
+			if key == 'address_id':
 				if not type(kwargs[key]) == int:
+					raise NotIntegerError(f'key: {key} must be an integer!')
+			elif key == 'activities':
+				if not type(kwargs[key]) == list:
 					raise NotIntegerError(f'key: {key} must be an integer!')
 			else:
 				if not type(kwargs[key]) == str:
